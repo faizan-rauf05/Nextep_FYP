@@ -210,6 +210,8 @@ function StudentSignupForm() {
 function CounsellorSignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
   const router = useRouter();
   // State for counseller
   const [formData, setFormData] = useState({
@@ -221,6 +223,26 @@ function CounsellorSignupForm() {
     bio: "",
     password: "",
   });
+
+  const handleImageUpload = async (file: File) => {
+    setImageUploading(true);
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: fd,
+    });
+
+    console.log(res,"res");
+
+    const data = await res.json();
+    setImageUrl(data.url);
+    console.log("image url", data.url);
+
+    setImageUploading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,6 +256,7 @@ function CounsellorSignupForm() {
           role: "counsellor",
           ...formData,
           experience: Number(formData.experience),
+          image: imageUrl,
         }),
       });
 
@@ -332,6 +355,19 @@ function CounsellorSignupForm() {
           value={formData.experience}
           onChange={handleChange}
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>{
+            console.log("e",e);
+            e.target.files && handleImageUpload(e.target.files[0])
+          }
+            
+          }
         />
       </div>
 

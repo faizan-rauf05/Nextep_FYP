@@ -39,6 +39,7 @@ const UserSchema = new Schema(
       type: Number,
       default: null,
     },
+    image: String,
     bio: {
       type: String,
       default: null,

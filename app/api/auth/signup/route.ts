@@ -8,6 +8,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { role } = body
+    console.log(body);
 
     await connectDB()
 
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
 
       await User.create({
         ...body,
+        image: body.image,
         password: hashedPassword,
       })
     }
@@ -33,6 +35,7 @@ export async function POST(req: Request) {
 
       await User.create({
         ...body,
+        image: body.image,
         password: hashedPassword,
       })
     }
