@@ -42,8 +42,9 @@ export default function LoginPage() {
       return;
     }
 
-    // Store token (temporary)
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data));
+
+    
 
     if (data.role === "admin") {
       window.location.href = "/admin";

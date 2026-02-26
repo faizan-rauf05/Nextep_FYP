@@ -178,6 +178,8 @@ export default function BookSessionPage() {
     setSelectedSessionType(null);
   };
 
+  console.log("sss", selectedCounsellor);
+
   // Success State
   if (currentStep === "success") {
     return (
@@ -400,8 +402,8 @@ export default function BookSessionPage() {
               selectedSessionType && (
                 <BookingConfirmation
                   counsellor={{
-                    name: selectedCounsellor.name,
-                    photo: selectedCounsellor.photo,
+                    name: selectedCounsellor?.firstName,
+                    photo: selectedCounsellor?.photo,
                     specialization: selectedCounsellor.specialization,
                     sessionPrice: selectedCounsellor.sessionPrice,
                   }}

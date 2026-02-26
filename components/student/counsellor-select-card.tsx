@@ -25,6 +25,7 @@ interface CounsellorCardProps {
 }
 
 export function CounsellorCard({ counsellor, isSelected, onSelect }: CounsellorCardProps) {
+  console.log(counsellor)
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-lg ${
@@ -38,7 +39,7 @@ export function CounsellorCard({ counsellor, isSelected, onSelect }: CounsellorC
           <Avatar className="h-16 w-16 flex-shrink-0">
             <AvatarImage src={counsellor.photo} alt={counsellor.name} />
             <AvatarFallback className="bg-background border border-border">
-              {counsellor.name.split(' ').map(n => n[0]).join('')}
+              {counsellor?.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
 
@@ -77,7 +78,7 @@ export function CounsellorCard({ counsellor, isSelected, onSelect }: CounsellorC
 
             {/* Availability */}
             <div className="flex flex-wrap gap-2 mb-3">
-              {counsellor.availability.slice(0, 3).map((slot) => (
+              {counsellor.availability?.slice(0, 3).map((slot) => (
                 <Badge key={slot} variant="secondary" className="text-xs">
                   {slot}
                 </Badge>

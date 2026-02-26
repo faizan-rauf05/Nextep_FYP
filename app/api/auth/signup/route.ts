@@ -27,6 +27,9 @@ export async function POST(req: Request) {
       })
     }
 
+     const staticSlots = ["9:00 AM", "10:00 AM", "2:00 PM", "3:00 PM", "4:00 PM"];
+     
+
     if (role === "counsellor") {
       const exists = await User.findOne({ email: body.email })
       if (exists) {
@@ -37,6 +40,7 @@ export async function POST(req: Request) {
         ...body,
         image: body.image,
         password: hashedPassword,
+        availability: staticSlots,
       })
     }
 

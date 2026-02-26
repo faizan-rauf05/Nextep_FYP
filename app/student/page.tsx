@@ -73,10 +73,10 @@ export default function StudentDashboard() {
           <h1 className="text-2xl font-semibold tracking-tight">Welcome Back, Sarah</h1>
           <p className="text-muted-foreground text-sm mt-1">Track your career journey and upcoming sessions</p>
         </div>
-        <Button className="w-fit">
+        {/* <Button className="w-fit">
           <Calendar className="mr-2 h-4 w-4" />
           Book New Session
-        </Button>
+        </Button> */}
       </div>
 
       {/* Stats Cards */}

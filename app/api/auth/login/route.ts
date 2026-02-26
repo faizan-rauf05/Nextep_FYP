@@ -33,10 +33,16 @@ export async function POST(req: Request) {
       { expiresIn: "7d" },
     );
 
+    console.log(user);
+
     return NextResponse.json({
-      token,
-      role: user.role,
-      isMatch,
+      id: user._id,
+      firstName: user.firstName,
+      lastName:user.lastName,
+      email: user.email,
+      role: user?.role,
+      exp: user?.experience,
+      specialization: user.specialization,
     });
   } catch (error) {
     console.error(error);
