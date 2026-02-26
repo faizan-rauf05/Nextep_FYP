@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { StudentStatCard } from "@/components/student/stat-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Calendar,
   CheckCircle,
@@ -29,48 +30,118 @@ import {
   Area,
 } from "recharts"
 
-// Mock data
-const sessionsData = [
-  { month: "Jan", sessions: 2 },
-  { month: "Feb", sessions: 3 },
-  { month: "Mar", sessions: 2 },
-  { month: "Apr", sessions: 4 },
-  { month: "May", sessions: 3 },
-  { month: "Jun", sessions: 5 },
-]
-
-const progressData = [
-  { week: "Week 1", progress: 20 },
-  { week: "Week 2", progress: 35 },
-  { week: "Week 3", progress: 50 },
-  { week: "Week 4", progress: 65 },
-]
-
-const upcomingSessions = [
-  { id: 1, counsellor: "Dr. Amanda Foster", specialization: "Tech Careers", date: "Jan 25, 2026", time: "10:00 AM", status: "confirmed" },
-  { id: 2, counsellor: "Lisa Thompson", specialization: "Finance", date: "Jan 27, 2026", time: "2:00 PM", status: "confirmed" },
-  { id: 3, counsellor: "David Martinez", specialization: "Creative Arts", date: "Feb 1, 2026", time: "11:00 AM", status: "pending" },
-]
-
-const careerRecommendations = [
-  { id: 1, title: "Software Engineer", match: 92, reason: "Strong technical skills & problem-solving" },
-  { id: 2, title: "Product Manager", match: 88, reason: "Good analytical & communication abilities" },
-  { id: 3, title: "Data Analyst", match: 85, reason: "Excellent with data interpretation" },
-]
-
-const recentMessages = [
-  { id: 1, from: "Dr. Amanda Foster", message: "Great session today! Here's a follow-up resource...", time: "2h ago", unread: true },
-  { id: 2, from: "Lisa Thompson", message: "Looking forward to our next session next week.", time: "1d ago", unread: false },
-  { id: 3, from: "David Martinez", message: "Your portfolio is impressive. Let's discuss...", time: "3d ago", unread: false },
-]
+interface DashboardData {
+  sessionsData: Array<{ month: string; sessions: number }>
+  progressData: Array<{ week: string; progress: number }>
+  upcomingSessions: Array<{
+    id: string
+    counsellor: string
+    specialization: string
+    date: string
+    time: string
+    status: string
+  }>
+  recentMessages: Array<{
+    id: number
+    from: string
+    message: string
+    time: string
+    unread: boolean
+  }>
+  stats: {
+    totalSessions: number
+    completedSessions: number
+    nextSession: {
+      daysUntil: number
+      counsellor: string
+    } | null
+    profileStrength: number
+    newMessages: number
+  }
+  careerRecommendations: Array<{
+    id: number
+    title: string
+    match: number
+    reason: string
+  }>
+}
 
 export default function StudentDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [studentName, setStudentName] = useState("Sarah")
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+
+        // Get student ID from localStorage or session
+        const studentId = localStorage.getItem("studentId")
+        const firstName = localStorage.getItem("firstName")
+
+        if (firstName) {
+          setStudentName(firstName)
+        }
+
+        if (!studentId) {
+          setError("Student ID not found")
+          setLoading(false)
+          return
+        }
+
+        const response = await fetch(`/api/student/dashboard?studentId=${studentId}`)
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data")
+        }
+
+        const dashboardData = await response.json()
+        setData(dashboardData)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err)
+        setError("Failed to load dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-800">{error}</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const sessionsData = data?.sessionsData || []
+  const progressData = data?.progressData || []
+  const upcomingSessions = data?.upcomingSessions || []
+  const careerRecommendations = data?.careerRecommendations || []
+  const recentMessages = data?.recentMessages || []
+  const stats = data?.stats || {
+    totalSessions: 0,
+    completedSessions: 0,
+    nextSession: null,
+    profileStrength: 0,
+    newMessages: 0,
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome Back, Sarah</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Welcome Back, {studentName}</h1>
           <p className="text-muted-foreground text-sm mt-1">Track your career journey and upcoming sessions</p>
         </div>
         {/* <Button className="w-fit">
@@ -83,25 +154,41 @@ export default function StudentDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StudentStatCard
           title="Sessions Booked"
-          value="12"
-          subtitle="2 completed this month"
+          value={loading ? <Skeleton className="h-8 w-12" /> : stats.totalSessions.toString()}
+          subtitle={`${stats.completedSessions} completed`}
           icon={CheckCircle}
         />
         <StudentStatCard
           title="Next Session"
-          value="2 days"
-          subtitle="With Dr. Amanda Foster"
+          value={
+            loading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : stats.nextSession ? (
+              `${stats.nextSession.daysUntil} days`
+            ) : (
+              "—"
+            )
+          }
+          subtitle={
+            loading ? (
+              <Skeleton className="h-4 w-32 mt-1" />
+            ) : stats.nextSession ? (
+              `With ${stats.nextSession.counsellor}`
+            ) : (
+              "No upcoming sessions"
+            )
+          }
           icon={Clock}
         />
         <StudentStatCard
           title="Profile Strength"
-          value="85%"
+          value={loading ? <Skeleton className="h-8 w-12" /> : `${stats.profileStrength}%`}
           subtitle="Almost complete"
           icon={Award}
         />
         <StudentStatCard
           title="New Messages"
-          value="3"
+          value={loading ? <Skeleton className="h-8 w-12" /> : stats.newMessages.toString()}
           subtitle="From your counsellors"
           icon={MessageSquare}
         />
