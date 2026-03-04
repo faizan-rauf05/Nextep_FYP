@@ -2,34 +2,33 @@ import { NextResponse } from "next/server"
 import { connectDB } from "@/lib/mongodb"
 import Meeting from "@/models/Meeting"
 
-export async function GET(req: Request) {
-  console.log("first");
+export async function GET(req) {
+  console.log("first")
+
   try {
     await connectDB()
 
     const { searchParams } = new URL(req.url)
-    const studentId = searchParams.get("studentId")
+    const counsellorId = searchParams.get("counsellorId")
 
-    console.log(studentId);
-
-    if (!studentId) {
+    if (!counsellorId) {
       return NextResponse.json(
-        { message: "Student ID is required" },
+        { message: "Counsellor ID is required" },
         { status: 400 }
       )
     }
 
     const meetings = await Meeting.find({
-      student: studentId,
+      counsellor: counsellorId,
     })
-      .populate("counsellor", "firstName lastName specialization image")
-      .sort({ date: 1 })
+      .populate("student", "firstName lastName email")
+      .sort({ date: -1 })
       .lean()
 
-      console.log(meetings);
-
     return NextResponse.json(meetings)
+
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
       { message: "Error fetching meetings" },
       { status: 500 }

@@ -1,62 +1,182 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SaveNotification } from './save-notification'
-import { User } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SaveNotification } from "./save-notification";
+import { User } from "lucide-react";
 
-interface PersonalInfo {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  dateOfBirth: string
+// Flattened interface for form display
+interface PersonalInfoForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  education: string; // string for form display
+  interests: string;
 }
 
 export function ProfileFormSection() {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showSaved, setShowSaved] = useState(false)
-  const [formData, setFormData] = useState<PersonalInfo>({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+92 300 1234567',
-    dateOfBirth: '1998-05-15',
-  })
-  const [editData, setEditData] = useState(formData)
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [formData, setFormData] = useState<PersonalInfoForm>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    education: "",
+    interests: "",
+  });
+
+  const [editData, setEditData] = useState(formData);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed.id) setStudentId(parsed.id);
+      } catch (err) {
+        console.error("Failed to parse user from localStorage", err);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    // Try to get full student object from localStorage
+    const storedData = localStorage.getItem("studentData");
+    if (storedData) {
+      try {
+        const parsed = JSON.parse(storedData);
+
+        // Prepare flattened education string for form
+        let flatEducation = "";
+        if (parsed.education && typeof parsed.education === "object") {
+          flatEducation = `${parsed.education.degree}, ${parsed.education.major}, ${parsed.education.university} (${parsed.education.startYear} - ${parsed.education.endYear})`;
+        }
+
+        setFormData({
+          firstName: parsed.firstName || "",
+          lastName: parsed.lastName || "",
+          email: parsed.email || "",
+          phone: parsed.phone || "",
+          dateOfBirth: parsed.dateOfBirth ? parsed.dateOfBirth.split("T")[0] : "",
+          education: flatEducation,
+          interests: parsed.interests || "",
+        });
+
+        setEditData({
+          firstName: parsed.firstName || "",
+          lastName: parsed.lastName || "",
+          email: parsed.email || "",
+          phone: parsed.phone || "",
+          dateOfBirth: parsed.dateOfBirth ? parsed.dateOfBirth.split("T")[0] : "",
+          education: flatEducation,
+          interests: parsed.interests || "",
+        });
+
+        setLoading(false);
+        return;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // If not in localStorage, fetch from API
+    async function fetchStudent() {
+      try {
+        const res = await fetch(`/api/students/getStudent?studentId=${studentId}`);
+        if (!res.ok) throw new Error("Failed to fetch student");
+        const data = await res.json();
+
+        // Store full student object in localStorage as-is
+        localStorage.setItem("studentData", JSON.stringify(data));
+
+        // Flatten education for form display
+        let flatEducation = "";
+        if (data.education && typeof data.education === "object") {
+          flatEducation = `${data.education.degree}, ${data.education.major}, ${data.education.university} (${data.education.startYear} - ${data.education.endYear})`;
+        }
+
+        setFormData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split("T")[0] : "",
+          education: flatEducation,
+          interests: data.interests || "",
+        });
+
+        setEditData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split("T")[0] : "",
+          education: flatEducation,
+          interests: data.interests || "",
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudent();
+  }, [studentId]);
 
   const handleEdit = () => {
-    setEditData(formData)
-    setIsEditing(true)
-  }
+    setEditData(formData);
+    setIsEditing(true);
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
-    setEditData(formData)
-  }
+    setIsEditing(false);
+    setEditData(formData);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setEditData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setFormData(editData)
-    setIsSaving(false)
-    setIsEditing(false)
-    setShowSaved(true)
-    setTimeout(() => setShowSaved(false), 3000)
-  }
+  const handleSave = () => {
+    // Update localStorage full object while keeping flattened form for UI
+    const storedData = localStorage.getItem("studentData");
+    if (storedData) {
+      const parsed = JSON.parse(storedData);
+      const updated = { ...parsed };
+
+      // Update only the editable fields
+      updated.firstName = editData.firstName;
+      updated.lastName = editData.lastName;
+      updated.email = editData.email;
+      updated.phone = editData.phone;
+      updated.dateOfBirth = editData.dateOfBirth;
+      updated.interests = editData.interests;
+
+      // Save back full object
+      localStorage.setItem("studentData", JSON.stringify(updated));
+    }
+
+    setFormData(editData);
+    setIsEditing(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 3000);
+  };
+
+  if (loading) return <p className="text-center py-8">Loading student data...</p>;
 
   return (
     <>
@@ -69,143 +189,90 @@ export function ProfileFormSection() {
         </CardHeader>
         <CardContent className="space-y-6">
           {!isEditing ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
-                    First Name
-                  </Label>
-                  <p className="text-foreground">{formData.firstName}</p>
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
-                    Last Name
-                  </Label>
-                  <p className="text-foreground">{formData.lastName}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
-                    Email
-                  </Label>
-                  <p className="text-foreground">{formData.email}</p>
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
-                    Phone
-                  </Label>
-                  <p className="text-foreground">{formData.phone}</p>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
-                  Date of Birth
-                </Label>
-                <p className="text-foreground">{formData.dateOfBirth}</p>
-              </div>
-
-              <Button onClick={handleEdit} className="mt-4">
-                Edit Information
-              </Button>
-            </div>
+            <DisplayView data={formData} onEdit={handleEdit} />
           ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName" className="text-xs font-semibold mb-2 block">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    value={editData.firstName}
-                    onChange={handleChange}
-                    placeholder="First name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName" className="text-xs font-semibold mb-2 block">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    value={editData.lastName}
-                    onChange={handleChange}
-                    placeholder="Last name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="email" className="text-xs font-semibold mb-2 block">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={editData.email}
-                    onChange={handleChange}
-                    placeholder="Email address"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone" className="text-xs font-semibold mb-2 block">
-                    Phone
-                  </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={editData.phone}
-                    onChange={handleChange}
-                    placeholder="Phone number"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="dateOfBirth" className="text-xs font-semibold mb-2 block">
-                  Date of Birth
-                </Label>
-                <Input
-                  id="dateOfBirth"
-                  name="dateOfBirth"
-                  type="date"
-                  value={editData.dateOfBirth}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="flex-1"
-                >
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={isSaving}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
+            <EditView data={editData} onChange={handleChange} onSave={handleSave} onCancel={handleCancel} />
           )}
         </CardContent>
       </Card>
 
-      {showSaved && (
-        <SaveNotification message="Personal information updated successfully!" />
-      )}
+      {showSaved && <SaveNotification message="Personal information updated!" />}
     </>
-  )
+  );
+}
+
+// Reusable display view
+function DisplayView({ data, onEdit }: { data: PersonalInfoForm; onEdit: () => void }) {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Field label="First Name" value={data.firstName} />
+        <Field label="Last Name" value={data.lastName} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Field label="Email" value={data.email} />
+        <Field label="Phone" value={data.phone} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Field label="Education" value={data.education} />
+        <Field label="Interests" value={data.interests} />
+      </div>
+      <Field label="Date of Birth" value={data.dateOfBirth} />
+      <Button onClick={onEdit} className="mt-4">Edit Information</Button>
+    </div>
+  );
+}
+
+// Reusable edit view
+function EditView({ data, onChange, onSave, onCancel }: { data: PersonalInfoForm; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; onSave: () => void; onCancel: () => void; }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField id="firstName" label="First Name" name="firstName" value={data.firstName} onChange={onChange} />
+        <InputField id="lastName" label="Last Name" name="lastName" value={data.lastName} onChange={onChange} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField id="email" label="Email" name="email" type="email" value={data.email} onChange={onChange} />
+        <InputField id="phone" label="Phone" name="phone" value={data.phone} onChange={onChange} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField id="education" label="Education" name="education" value={data.education} onChange={onChange} />
+        <InputField id="interests" label="Interests" name="interests" value={data.interests} onChange={onChange} />
+      </div>
+      <InputField id="dateOfBirth" label="Date of Birth" name="dateOfBirth" type="date" value={data.dateOfBirth} onChange={onChange} />
+      <div className="flex gap-3 pt-4">
+        <Button onClick={onSave} className="flex-1">Save Changes</Button>
+        <Button variant="outline" onClick={onCancel} className="flex-1">Cancel</Button>
+      </div>
+    </div>
+  );
+}
+
+// Simple Field component
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <Label className="text-xs font-semibold text-muted-foreground mb-2 block">{label}</Label>
+      <p className="text-foreground">{value}</p>
+    </div>
+  );
+}
+
+// Reusable InputField component
+interface InputFieldProps {
+  id: string;
+  label: string;
+  name: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+function InputField({ id, label, name, type = "text", value, onChange }: InputFieldProps) {
+  return (
+    <div>
+      <Label htmlFor={id} className="text-xs font-semibold mb-2 block">{label}</Label>
+      <Input id={id} name={name} type={type} value={value} onChange={onChange} />
+    </div>
+  );
 }

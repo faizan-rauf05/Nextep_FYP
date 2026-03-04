@@ -44,8 +44,6 @@ export default function LoginPage() {
 
     localStorage.setItem("user", JSON.stringify(data));
 
-    
-
     if (data.role === "admin") {
       window.location.href = "/admin";
     } else if (data.role === "counsellor") {

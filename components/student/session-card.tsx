@@ -17,7 +17,7 @@ interface Session {
   time: string;
   sessionType: string;
   duration: string;
-  status: "upcoming" | "completed" | "cancelled";
+  status: "scheduled" | "completed" | "cancelled";
   notes?: string;
   feedback?: {
     rating: number;
@@ -131,7 +131,7 @@ export function SessionCard({ session }: SessionCardProps) {
                   className="gap-2"
                 >
                   <Eye className="h-4 w-4" />
-                  {session.status === "upcoming"
+                  {session.status === "scheduled"
                     ? "View Details"
                     : "View Session"}
                 </Button>

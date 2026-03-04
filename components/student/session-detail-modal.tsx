@@ -21,7 +21,7 @@ interface Session {
   time: string
   sessionType: string
   duration: string
-  status: 'upcoming' | 'completed' | 'cancelled'
+  status: 'scheduled' | 'completed' | 'cancelled'
   notes?: string
   feedback?: {
     rating: number
@@ -85,8 +85,8 @@ export function SessionDetailModal({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return 'Upcoming'
+      case 'scheduled':
+        return 'Scheduled'
       case 'completed':
         return 'Completed'
       case 'cancelled':
@@ -336,7 +336,7 @@ export function SessionDetailModal({
             >
               Close
             </Button>
-            {session.status === 'upcoming' && session.joinLink && (
+            {session.status === 'scheduled' && session.joinLink && (
               <Button>Join Session</Button>
             )}
           </div>

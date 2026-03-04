@@ -22,9 +22,9 @@ const navItems = [
   { label: "Dashboard", href: "/student", icon: LayoutDashboard },
   { label: "Book a Session", href: "/student/book-session", icon: Calendar },
   { label: "My Sessions", href: "/student/my-sessions", icon: BookOpen },
-  { label: "Career Recommendations", href: "/student/recommendations", icon: Lightbulb },
-  { label: "Messages", href: "/student/messages", icon: MessageSquare },
-  { label: "Payments", href: "/student/payments", icon: CreditCard },
+  // { label: "Career Recommendations", href: "/student/recommendations", icon: Lightbulb },
+  // { label: "Messages", href: "/student/messages", icon: MessageSquare },
+  // { label: "Payments", href: "/student/payments", icon: CreditCard },
   { label: "Profile Settings", href: "/student/settings", icon: User },
 ]
 

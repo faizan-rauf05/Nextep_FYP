@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +33,17 @@ const navItems = [
 export function CounsellorSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  // ✅ Logout function
+  const handleLogout = () => {
+    // Remove stored auth data
+    localStorage.removeItem("user")
+    localStorage.removeItem("token") // if you store token
+
+    // Redirect to home page
+    router.push("/")
+  }
 
   return (
     <aside
@@ -41,13 +52,17 @@ export function CounsellorSidebar() {
         collapsed ? "w-16" : "w-64"
       )}
     >
-      {/* Logo */}
+      {/* Logo Section */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
         {!collapsed && (
-          <Link href="/counsellor" className="font-semibold text-lg tracking-tight">
+          <Link
+            href="/counsellor"
+            className="font-semibold text-lg tracking-tight"
+          >
             PathFinder
           </Link>
         )}
+
         <Button
           variant="ghost"
           size="icon"
@@ -66,7 +81,8 @@ export function CounsellorSidebar() {
       <nav className="flex-1 py-4 overflow-y-auto">
         <ul className="space-y-1 px-2">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (pathname === "/counsellor" && item.href === "/counsellor")
+            const isActive = pathname === item.href
+
             return (
               <li key={item.href}>
                 <Link
@@ -93,6 +109,7 @@ export function CounsellorSidebar() {
       <div className="p-2 border-t border-border">
         <Button
           variant="ghost"
+          onClick={handleLogout}
           className={cn(
             "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
             collapsed && "justify-center px-2"

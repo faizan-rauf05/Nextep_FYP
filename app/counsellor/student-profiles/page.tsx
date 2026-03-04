@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { StudentCard } from '@/components/counsellor/student-card'
@@ -24,172 +24,106 @@ interface Student {
   notes?: string
 }
 
-// Mock data
-const MOCK_STUDENTS: Student[] = [
-  {
-    id: '1',
-    name: 'Ahmed Khan',
-    email: 'ahmed@example.com',
-    educationLevel: 'Bachelor - Computer Science',
-    institution: 'FAST-NUCES',
-    careerInterests: ['Software Development', 'Tech Startups', 'AI/ML'],
-    careerGoals: 'Become a Senior Software Engineer within 5 years and lead a tech team',
-    sessionsTaken: 5,
-    counsellingHistory: [
-      { date: 'Feb 10, 2024', topic: 'Career Guidance' },
-      { date: 'Jan 28, 2024', topic: 'Resume Review' },
-      { date: 'Jan 15, 2024', topic: 'Interview Preparation' },
-      { date: 'Dec 20, 2023', topic: 'Career Assessment' },
-      { date: 'Nov 30, 2023', topic: 'Career Guidance' },
-    ],
-    notes: 'Highly motivated student with strong technical background. Shows consistent progress in career development.',
-  },
-  {
-    id: '2',
-    name: 'Fatima Ali',
-    email: 'fatima@example.com',
-    educationLevel: 'Master - Business Administration',
-    institution: 'IBA Karachi',
-    careerInterests: ['Management', 'Finance', 'Consulting'],
-    careerGoals: 'Work in management consulting and eventually establish own consultancy',
-    sessionsTaken: 3,
-    counsellingHistory: [
-      { date: 'Feb 08, 2024', topic: 'Interview Preparation' },
-      { date: 'Jan 20, 2024', topic: 'Career Guidance' },
-      { date: 'Dec 25, 2023', topic: 'Career Assessment' },
-    ],
-    notes: 'Excellent communication skills and leadership potential. Needs focus on networking and industry connections.',
-  },
-  {
-    id: '3',
-    name: 'Hassan Ali',
-    email: 'hassan@example.com',
-    educationLevel: 'Bachelor - Mechanical Engineering',
-    institution: 'NED University',
-    careerInterests: ['Manufacturing', 'Automotive', 'Energy Sector'],
-    careerGoals: 'Transition into management and lead engineering teams',
-    sessionsTaken: 2,
-    counsellingHistory: [
-      { date: 'Jan 30, 2024', topic: 'Resume Review' },
-      { date: 'Dec 18, 2023', topic: 'Career Assessment' },
-    ],
-    notes: 'Strong technical foundation but needs guidance on transitioning to management roles.',
-  },
-  {
-    id: '4',
-    name: 'Zainab Hassan',
-    email: 'zainab@example.com',
-    educationLevel: 'Bachelor - Marketing',
-    institution: 'Lahore University',
-    careerInterests: ['Digital Marketing', 'Brand Management', 'Content Strategy'],
-    careerGoals: 'Become a Digital Marketing Manager and lead creative campaigns',
-    sessionsTaken: 4,
-    counsellingHistory: [
-      { date: 'Feb 05, 2024', topic: 'Career Guidance' },
-      { date: 'Jan 25, 2024', topic: 'Interview Preparation' },
-      { date: 'Dec 28, 2023', topic: 'Resume Review' },
-      { date: 'Nov 20, 2023', topic: 'Career Assessment' },
-    ],
-  },
-  {
-    id: '5',
-    name: 'Sara Khan',
-    email: 'sara@example.com',
-    educationLevel: 'Bachelor - Psychology',
-    institution: 'University of Karachi',
-    careerInterests: ['HR', 'Organizational Psychology', 'Training & Development'],
-    careerGoals: 'Build expertise in organizational psychology and talent management',
-    sessionsTaken: 3,
-    counsellingHistory: [
-      { date: 'Feb 02, 2024', topic: 'Career Assessment' },
-      { date: 'Jan 15, 2024', topic: 'Career Guidance' },
-      { date: 'Dec 10, 2023', topic: 'Resume Review' },
-    ],
-  },
-]
-
 type FilterLevel = 'all' | 'bachelor' | 'master' | 'phd'
 
 export default function StudentProfilesPage() {
+  const [students, setStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all')
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
+  // ✅ Fetch students assigned to counsellor
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) return
+        const userData = JSON.parse(storedUser)
+        const counsellorId = userData.id || userData._id
+
+        const res = await fetch(`/api/students/getAssignedStudents?counsellorId=${counsellorId}`)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message)
+
+        setStudents(data)
+      } catch (error) {
+        console.error('Error fetching students:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStudents()
+  }, [])
+
+  // Filtered students
   const filteredStudents = useMemo(() => {
-    let students = MOCK_STUDENTS
+    let result = students
 
     if (searchQuery) {
-      students = students.filter((s) =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.careerInterests.some((interest) =>
-          interest.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      result = result.filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.careerInterests.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
 
     if (filterLevel !== 'all') {
-      students = students.filter((s) => {
-        const level = s.educationLevel.toLowerCase().split(' - ')[0]
-        return level === filterLevel
-      })
+      result = result.filter((s) => s.educationLevel.toLowerCase().startsWith(filterLevel))
     }
 
-    return students
-  }, [searchQuery, filterLevel])
+    return result
+  }, [students, searchQuery, filterLevel])
 
-  const bachelorCount = MOCK_STUDENTS.filter((s) => s.educationLevel.includes('Bachelor')).length
-  const masterCount = MOCK_STUDENTS.filter((s) => s.educationLevel.includes('Master')).length
-  const totalSessions = MOCK_STUDENTS.reduce((sum, s) => sum + s.sessionsTaken, 0)
+  // Stats
+  const totalStudents = students.length
+  const totalSessions = students.reduce((sum, s) => sum + s.sessionsTaken, 0)
+  const avgSessions = totalStudents ? (totalSessions / totalStudents).toFixed(1) : 0
+
+  if (loading) {
+    return <p className="text-center py-12 text-muted-foreground">Loading students...</p>
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Student Profiles</h1>
-        <p className="text-muted-foreground">
-          Manage and view profiles of all students assigned to you
-        </p>
+        <p className="text-muted-foreground">Manage and view profiles of all students assigned to you</p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-muted/50 border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Total Students</p>
-                <p className="text-2xl font-bold text-foreground">{MOCK_STUDENTS.length}</p>
-              </div>
-              <Users className="h-8 w-8 text-muted-foreground opacity-50" />
+          <CardContent className="p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Total Students</p>
+              <p className="text-2xl font-bold text-foreground">{totalStudents}</p>
             </div>
+            <Users className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
         </Card>
 
         <Card className="bg-muted/50 border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Total Sessions</p>
-                <p className="text-2xl font-bold text-foreground">{totalSessions}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
+          <CardContent className="p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Total Sessions</p>
+              <p className="text-2xl font-bold text-foreground">{totalSessions}</p>
             </div>
+            <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
         </Card>
 
         <Card className="bg-muted/50 border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Avg Sessions per Student</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {(totalSessions / MOCK_STUDENTS.length).toFixed(1)}
-                </p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
+          <CardContent className="p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Avg Sessions per Student</p>
+              <p className="text-2xl font-bold text-foreground">{avgSessions}</p>
             </div>
+            <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
         </Card>
       </div>
@@ -197,13 +131,10 @@ export default function StudentProfilesPage() {
       {/* Students List */}
       <Card className="border-border">
         <CardHeader className="border-b border-border">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <CardTitle className="text-lg">Student Directory</CardTitle>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
+            <div className="flex gap-4 flex-1 md:max-w-sm">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, email, or interest..."
@@ -213,18 +144,15 @@ export default function StudentProfilesPage() {
                 />
               </div>
             </div>
-
-            <Tabs
-              value={filterLevel}
-              onValueChange={(value) => setFilterLevel(value as FilterLevel)}
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All Students</TabsTrigger>
-                <TabsTrigger value="bachelor">Bachelor ({bachelorCount})</TabsTrigger>
-                <TabsTrigger value="master">Master ({masterCount})</TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
+
+          <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as FilterLevel)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all">All Students</TabsTrigger>
+              <TabsTrigger value="bachelor">Bachelor</TabsTrigger>
+              <TabsTrigger value="master">Master</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </CardHeader>
 
         <CardContent className="p-6">

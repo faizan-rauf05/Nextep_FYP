@@ -28,10 +28,10 @@ export default function SettingsPage() {
         <EducationFormSection />
 
         {/* Career Interests */}
-        <CareerInterestsFormSection />
+        {/* <CareerInterestsFormSection /> */}
 
         {/* Password & Security */}
-        <PasswordChangeSection />
+        {/* <PasswordChangeSection /> */}
 
         {/* Footer */}
         <div className="pt-6 border-t border-border">

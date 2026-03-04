@@ -62,7 +62,7 @@ export function CounsellorCard({ counsellor, isSelected, onSelect }: CounsellorC
             <div className="flex items-center gap-4 mb-3 text-sm">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{counsellor.rating.toFixed(1)}</span>
+                {/* <span className="font-medium">{counsellor.rating.toFixed(1)}</span> */}
                 <span className="text-muted-foreground">({counsellor.totalReviews})</span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
