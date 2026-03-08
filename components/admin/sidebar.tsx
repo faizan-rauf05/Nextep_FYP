@@ -24,9 +24,9 @@ const navItems = [
   { label: "Students", href: "/admin/students", icon: Users },
   { label: "Career Counsellors", href: "/admin/counsellors", icon: UserCog },
   { label: "Bookings & Sessions", href: "/admin/bookings", icon: Calendar },
-  { label: "Payments & Revenue", href: "/admin/payments", icon: CreditCard },
-  { label: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
-  { label: "Content Management", href: "/admin/content", icon: FileText },
+  // { label: "Payments & Revenue", href: "/admin/payments", icon: CreditCard },
+  // { label: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
+  // { label: "Content Management", href: "/admin/content", icon: FileText },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
