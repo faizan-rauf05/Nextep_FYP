@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     const meetings = await Meeting.find({
       student: studentId,
     })
-      .populate("counsellor", "firstName lastName specialization image")
+      .populate("counsellor", "_id firstName lastName specialization image")
       .sort({ date: 1 })
       .lean()
 

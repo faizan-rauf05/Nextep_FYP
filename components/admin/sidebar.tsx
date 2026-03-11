@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,9 +10,6 @@ import {
   Users,
   UserCog,
   Calendar,
-  CreditCard,
-  BarChart3,
-  FileText,
   Settings,
   LogOut,
   ChevronLeft,
@@ -24,15 +21,19 @@ const navItems = [
   { label: "Students", href: "/admin/students", icon: Users },
   { label: "Career Counsellors", href: "/admin/counsellors", icon: UserCog },
   { label: "Bookings & Sessions", href: "/admin/bookings", icon: Calendar },
-  // { label: "Payments & Revenue", href: "/admin/payments", icon: CreditCard },
-  // { label: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
-  // { label: "Content Management", href: "/admin/content", icon: FileText },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
 export function AdminSidebar() {
+
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    localStorage.clear()        // remove all stored data
+    router.push("/")            // redirect to homepage
+  }
 
   return (
     <aside
@@ -48,6 +49,7 @@ export function AdminSidebar() {
             PathFinder
           </Link>
         )}
+
         <Button
           variant="ghost"
           size="icon"
@@ -67,6 +69,7 @@ export function AdminSidebar() {
         <ul className="space-y-1 px-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href
+
             return (
               <li key={item.href}>
                 <Link
@@ -93,6 +96,7 @@ export function AdminSidebar() {
       <div className="p-2 border-t border-border">
         <Button
           variant="ghost"
+          onClick={handleLogout}
           className={cn(
             "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
             collapsed && "justify-center px-2"

@@ -28,7 +28,7 @@ const UserSchema = new Schema(
 
     role: {
       type: String,
-      enum: ["student", "counsellor"],
+      enum: ["student", "counsellor", "admin"],
       required: true,
     },
 
@@ -49,6 +49,11 @@ const UserSchema = new Schema(
     },
     experience: {
       type: Number,
+      default: null,
+    },
+    assignedCounsellor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       default: null,
     },
     status: {

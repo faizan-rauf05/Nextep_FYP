@@ -35,7 +35,7 @@ export function BookingConfirmation({
   onCancel,
   isLoading,
 }: BookingConfirmationProps) {
-  console.log(counsellor);
+  console.log("cc"+counsellor);
   return (
     <div className="space-y-4">
       {/* Booking Summary */}
@@ -49,7 +49,7 @@ export function BookingConfirmation({
             <Avatar className="h-12 w-12">
               <AvatarImage src={counsellor.photo} alt={counsellor.name} />
               <AvatarFallback className="bg-background border border-border">
-                {counsellor?.name.split(' ').map(n => n[0]).join('')}
+                {counsellor?.name}
               </AvatarFallback>
             </Avatar>
             <div>

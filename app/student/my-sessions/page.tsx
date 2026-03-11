@@ -10,6 +10,7 @@ import Link from "next/link";
 
 interface Session {
   id: string;
+  counsellorId: string;
   counsellorName: string;
   counsellorPhoto: string;
   counsellorSpecialization: string;
@@ -18,13 +19,26 @@ interface Session {
   sessionType: string;
   duration: string;
   status: "scheduled" | "completed" | "cancelled";
-  notes?: string;
-  feedback?: {
-    rating: number;
-    comment: string;
-  };
   joinLink?: string;
 }
+
+// interface Session {
+//   id: string;
+//   counsellorName: string;
+//   counsellorPhoto: string;
+//   counsellorSpecialization: string;
+//   date: Date;
+//   time: string;
+//   sessionType: string;
+//   duration: string;
+//   status: "scheduled" | "completed" | "cancelled";
+//   notes?: string;
+//   feedback?: {
+//     rating: number;
+//     comment: string;
+//   };
+//   joinLink?: string;
+// }
 
 export default function MySessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -48,15 +62,19 @@ export default function MySessionsPage() {
 
     const fetchMeetings = async () => {
       try {
-        const res = await fetch(`/api/meetings/getMeeting?studentId=${studentId}`);
+        const res = await fetch(
+          `/api/meetings/getMeeting?studentId=${studentId}`,
+        );
         if (!res.ok) throw new Error("Failed to fetch meetings");
 
         const data = await res.json();
 
         const formatted: Session[] = data.map((meeting: any) => ({
           id: meeting._id,
+          counsellorId: meeting.counsellor?._id,
           counsellorName: meeting.counsellor?.firstName || "Unknown",
-          counsellorPhoto: meeting.counsellor?.photo || "/api/placeholder/48/48",
+          counsellorPhoto:
+            meeting.counsellor?.photo || "/api/placeholder/48/48",
           counsellorSpecialization: meeting.counsellor?.specialization || "",
           date: new Date(meeting.date),
           time: meeting.time,
@@ -81,7 +99,8 @@ export default function MySessionsPage() {
   const completedSessions = sessions.filter((s) => s.status === "completed");
   const cancelledSessions = sessions.filter((s) => s.status === "cancelled");
 
-  const sortByDateDesc = (a: Session, b: Session) => b.date.getTime() - a.date.getTime();
+  const sortByDateDesc = (a: Session, b: Session) =>
+    b.date.getTime() - a.date.getTime();
 
   if (loading) {
     return <p className="text-center mt-10">Loading sessions...</p>;
@@ -92,7 +111,9 @@ export default function MySessionsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">My Sessions</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            My Sessions
+          </h1>
           <p className="text-muted-foreground">
             Manage your past and upcoming counseling sessions
           </p>
@@ -114,7 +135,9 @@ export default function MySessionsPage() {
                 <p className="text-sm font-medium text-muted-foreground mb-1">
                   Upcoming Sessions
                 </p>
-                <p className="text-2xl font-bold text-foreground">{upcomingSessions.length}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {upcomingSessions.length}
+                </p>
               </div>
               <Calendar className="h-8 w-8 text-muted-foreground opacity-50" />
             </div>
@@ -128,7 +151,9 @@ export default function MySessionsPage() {
                 <p className="text-sm font-medium text-muted-foreground mb-1">
                   Completed Sessions
                 </p>
-                <p className="text-2xl font-bold text-foreground">{completedSessions.length}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {completedSessions.length}
+                </p>
               </div>
               <Clock className="h-8 w-8 text-muted-foreground opacity-50" />
             </div>
@@ -152,41 +177,57 @@ export default function MySessionsPage() {
 
             <TabsContent value="all" className="space-y-4 mt-6">
               {sessions.length > 0 ? (
-                sessions.sort(sortByDateDesc).map((session) => (
-                  <SessionCard key={session.id} session={session} />
-                ))
+                sessions
+                  .sort(sortByDateDesc)
+                  .map((session) => (
+                    <SessionCard key={session.id} session={session} />
+                  ))
               ) : (
-                <p className="text-center text-muted-foreground">No sessions found</p>
+                <p className="text-center text-muted-foreground">
+                  No sessions found
+                </p>
               )}
             </TabsContent>
 
             <TabsContent value="upcoming" className="space-y-4 mt-6">
               {upcomingSessions.length > 0 ? (
-                upcomingSessions.sort(sortByDateDesc).map((session) => (
-                  <SessionCard key={session.id} session={session} />
-                ))
+                upcomingSessions
+                  .sort(sortByDateDesc)
+                  .map((session) => (
+                    <SessionCard key={session.id} session={session} />
+                  ))
               ) : (
-                <p className="text-center text-muted-foreground">No upcoming sessions</p>
+                <p className="text-center text-muted-foreground">
+                  No upcoming sessions
+                </p>
               )}
             </TabsContent>
 
             <TabsContent value="completed" className="space-y-4 mt-6">
               {completedSessions.length > 0 ? (
-                completedSessions.sort(sortByDateDesc).map((session) => (
-                  <SessionCard key={session.id} session={session} />
-                ))
+                completedSessions
+                  .sort(sortByDateDesc)
+                  .map((session) => (
+                    <SessionCard key={session.id} session={session} />
+                  ))
               ) : (
-                <p className="text-center text-muted-foreground">No completed sessions</p>
+                <p className="text-center text-muted-foreground">
+                  No completed sessions
+                </p>
               )}
             </TabsContent>
 
             <TabsContent value="cancelled" className="space-y-4 mt-6">
               {cancelledSessions.length > 0 ? (
-                cancelledSessions.sort(sortByDateDesc).map((session) => (
-                  <SessionCard key={session.id} session={session} />
-                ))
+                cancelledSessions
+                  .sort(sortByDateDesc)
+                  .map((session) => (
+                    <SessionCard key={session.id} session={session} />
+                  ))
               ) : (
-                <p className="text-center text-muted-foreground">No cancelled sessions</p>
+                <p className="text-center text-muted-foreground">
+                  No cancelled sessions
+                </p>
               )}
             </TabsContent>
           </Tabs>

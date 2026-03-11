@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 
 export async function GET() {
+  console.log("All students run");
   await connectDB();
 
   // ✅ Get ALL students (active + inactive)
@@ -10,6 +11,8 @@ export async function GET() {
     .sort({ createdAt: -1 });
 
   const totalStudents = students.length;
+
+  console.log(totalStudents);
 
   const activeStudentsCount = students.filter(
     (student) => student.status === "active"

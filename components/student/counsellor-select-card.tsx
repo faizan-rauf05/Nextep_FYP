@@ -39,7 +39,7 @@ export function CounsellorCard({ counsellor, isSelected, onSelect }: CounsellorC
           <Avatar className="h-16 w-16 flex-shrink-0">
             <AvatarImage src={counsellor.photo} alt={counsellor.name} />
             <AvatarFallback className="bg-background border border-border">
-              {counsellor?.name.split(' ').map(n => n[0]).join('')}
+              {counsellor?.name}
             </AvatarFallback>
           </Avatar>
 

@@ -22,11 +22,11 @@ import {
 const navItems = [
   { label: "Dashboard", href: "/counsellor", icon: LayoutDashboard },
   { label: "My Sessions", href: "/counsellor/my-sessions", icon: BookOpen },
-  { label: "Student Profiles", href: "/counsellor/student-profiles", icon: Users },
+  // { label: "Student Profiles", href: "/counsellor/student-profiles", icon: Users },
   { label: "Availability", href: "/counsellor/availability", icon: Clock },
   { label: "Earnings", href: "/counsellor/earnings", icon: TrendingUp },
   { label: "Reviews & Feedback", href: "/counsellor/reviews", icon: Star },
-  { label: "Messages", href: "/counsellor/messages", icon: MessageSquare },
+  // { label: "Messages", href: "/counsellor/messages", icon: MessageSquare },
   { label: "Profile Settings", href: "/counsellor/settings", icon: User },
 ]
 

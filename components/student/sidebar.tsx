@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,6 +31,12 @@ const navItems = [
 export function StudentSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    localStorage.clear() // clear all stored data
+    router.push("/") // redirect to home
+  }
 
   return (
     <aside
@@ -46,6 +52,7 @@ export function StudentSidebar() {
             PathFinder
           </Link>
         )}
+
         <Button
           variant="ghost"
           size="icon"
@@ -64,7 +71,10 @@ export function StudentSidebar() {
       <nav className="flex-1 py-4 overflow-y-auto">
         <ul className="space-y-1 px-2">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (pathname === "/student" && item.href === "/student")
+            const isActive =
+              pathname === item.href ||
+              (pathname === "/student" && item.href === "/student")
+
             return (
               <li key={item.href}>
                 <Link
@@ -91,6 +101,7 @@ export function StudentSidebar() {
       <div className="p-2 border-t border-border">
         <Button
           variant="ghost"
+          onClick={handleLogout}
           className={cn(
             "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
             collapsed && "justify-center px-2"

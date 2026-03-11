@@ -1,39 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Calendar, Clock, Star, MessageSquare } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Clock, Star, MessageSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Session {
-  id: string
-  counsellorName: string
-  counsellorPhoto: string
-  counsellorSpecialization: string
-  date: Date
-  time: string
-  sessionType: string
-  duration: string
-  status: 'scheduled' | 'completed' | 'cancelled'
-  notes?: string
+  id: string;
+  counsellorId?: string;
+  counsellorName: string;
+  counsellorPhoto: string;
+  counsellorSpecialization: string;
+  date: Date;
+  time: string;
+  sessionType: string;
+  duration: string;
+  status: "scheduled" | "completed" | "cancelled";
+  notes?: string;
   feedback?: {
-    rating: number
-    comment: string
-  }
-  joinLink?: string
+    rating: number;
+    comment: string;
+  };
+  joinLink?: string;
 }
 
 interface SessionDetailModalProps {
-  session: Session
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  session: Session;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function SessionDetailModal({
@@ -42,59 +48,87 @@ export function SessionDetailModal({
   onOpenChange,
 }: SessionDetailModalProps) {
   const [submittedFeedback, setSubmittedFeedback] = useState(
-    session.feedback || null
-  )
+    session.feedback || null,
+  );
   const [feedbackRating, setFeedbackRating] = useState(
-    session.feedback?.rating || 0
-  )
+    session.feedback?.rating || 0,
+  );
   const [feedbackComment, setFeedbackComment] = useState(
-    session.feedback?.comment || ''
-  )
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+    session.feedback?.comment || "",
+  );
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-  const formattedDate = session.date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const formattedDate = session.date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   const handleSubmitFeedback = async () => {
-    setIsSubmittingFeedback(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setSubmittedFeedback({
-      rating: feedbackRating,
-      comment: feedbackComment,
-    })
-    setIsSubmittingFeedback(false)
-  }
+    try {
+      setIsSubmittingFeedback(true);
+
+      const storedUser = localStorage.getItem("user");
+      const studentId = storedUser ? JSON.parse(storedUser).id : null;
+
+      const res = await fetch("/api/reviews/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studentId,
+          counsellorId: session.counsellorId,
+          rating: feedbackRating,
+          comment: feedbackComment,
+        }),
+      });
+
+      const data = await res.json();
+
+      console.log(res);
+
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+
+      setSubmittedFeedback({
+        rating: feedbackRating,
+        comment: feedbackComment,
+      });
+    } catch (error) {
+      console.error("Feedback error:", error);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return 'default'
-      case 'completed':
-        return 'secondary'
-      case 'cancelled':
-        return 'destructive'
+      case "upcoming":
+        return "default";
+      case "completed":
+        return "secondary";
+      case "cancelled":
+        return "destructive";
       default:
-        return 'default'
+        return "default";
     }
-  }
+  };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'scheduled':
-        return 'Scheduled'
-      case 'completed':
-        return 'Completed'
-      case 'cancelled':
-        return 'Cancelled'
+      case "scheduled":
+        return "Scheduled";
+      case "completed":
+        return "Completed";
+      case "cancelled":
+        return "Cancelled";
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,9 +146,9 @@ export function SessionDetailModal({
                   <AvatarImage src={session.counsellorPhoto} />
                   <AvatarFallback className="bg-muted">
                     {session.counsellorName
-                      .split(' ')
+                      .split(" ")
                       .map((n) => n[0])
-                      .join('')}
+                      .join("")}
                   </AvatarFallback>
                 </Avatar>
 
@@ -149,7 +183,9 @@ export function SessionDetailModal({
                   </p>
                   <div className="flex items-center gap-2 text-sm text-foreground">
                     <Clock className="h-4 w-4" />
-                    <span>{session.time} • {session.duration}</span>
+                    <span>
+                      {session.time} • {session.duration}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -159,7 +195,9 @@ export function SessionDetailModal({
                   <p className="text-xs font-medium text-muted-foreground mb-1">
                     SESSION TYPE
                   </p>
-                  <p className="text-sm text-foreground">{session.sessionType}</p>
+                  <p className="text-sm text-foreground">
+                    {session.sessionType}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -224,10 +262,10 @@ export function SessionDetailModal({
                           <Star
                             key={star}
                             className={cn(
-                              'h-5 w-5',
+                              "h-5 w-5",
                               star <= submittedFeedback.rating
-                                ? 'fill-foreground text-foreground'
-                                : 'text-muted-foreground'
+                                ? "fill-foreground text-foreground"
+                                : "text-muted-foreground",
                             )}
                           />
                         ))}
@@ -252,10 +290,12 @@ export function SessionDetailModal({
                     </Button>
                   </CardContent>
                 </Card>
-              ) : session.status === 'completed' ? (
+              ) : session.status === "completed" ? (
                 <Card className="border-border">
                   <CardHeader>
-                    <CardTitle className="text-base">Share Your Feedback</CardTitle>
+                    <CardTitle className="text-base">
+                      Share Your Feedback
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -271,10 +311,10 @@ export function SessionDetailModal({
                           >
                             <Star
                               className={cn(
-                                'h-6 w-6 cursor-pointer',
+                                "h-6 w-6 cursor-pointer",
                                 star <= feedbackRating
-                                  ? 'fill-foreground text-foreground'
-                                  : 'text-muted-foreground'
+                                  ? "fill-foreground text-foreground"
+                                  : "text-muted-foreground",
                               )}
                             />
                           </button>
@@ -283,7 +323,10 @@ export function SessionDetailModal({
                     </div>
 
                     <div>
-                      <Label htmlFor="feedback-comment" className="text-sm font-medium mb-2 block">
+                      <Label
+                        htmlFor="feedback-comment"
+                        className="text-sm font-medium mb-2 block"
+                      >
                         Additional Comments (Optional)
                       </Label>
                       <Textarea
@@ -301,13 +344,15 @@ export function SessionDetailModal({
                         disabled={feedbackRating === 0 || isSubmittingFeedback}
                         className="flex-1"
                       >
-                        {isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback'}
+                        {isSubmittingFeedback
+                          ? "Submitting..."
+                          : "Submit Feedback"}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => {
-                          setFeedbackRating(0)
-                          setFeedbackComment('')
+                          setFeedbackRating(0);
+                          setFeedbackComment("");
                         }}
                       >
                         Clear
@@ -320,7 +365,8 @@ export function SessionDetailModal({
                   <CardContent className="p-6 text-center">
                     <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                     <p className="text-sm text-muted-foreground">
-                      Feedback can only be submitted after the session is completed.
+                      Feedback can only be submitted after the session is
+                      completed.
                     </p>
                   </CardContent>
                 </Card>
@@ -330,18 +376,15 @@ export function SessionDetailModal({
 
           {/* Action Buttons */}
           <div className="flex gap-2 justify-end border-t border-border pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            {session.status === 'scheduled' && session.joinLink && (
+            {session.status === "scheduled" && session.joinLink && (
               <Button>Join Session</Button>
             )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

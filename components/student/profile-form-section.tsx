@@ -211,13 +211,13 @@ function DisplayView({ data, onEdit }: { data: PersonalInfoForm; onEdit: () => v
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Email" value={data.email} />
-        <Field label="Phone" value={data.phone} />
+        {/* <Field label="Phone" value={data.phone} /> */}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Education" value={data.education} />
+        {/* <Field label="Education" value={data.education} /> */}
         <Field label="Interests" value={data.interests} />
       </div>
-      <Field label="Date of Birth" value={data.dateOfBirth} />
+      {/* <Field label="Date of Birth" value={data.dateOfBirth} /> */}
       <Button onClick={onEdit} className="mt-4">Edit Information</Button>
     </div>
   );

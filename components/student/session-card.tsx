@@ -117,13 +117,15 @@ export function SessionCard({ session }: SessionCardProps) {
                   <Button
                     size="sm"
                     className="gap-2"
-                    onClick={() => window.open(session.joinLink, "_blank")}
+                    disabled={session.status !== "scheduled"}
+                    onClick={() => window.open(session.joinLink!, "_blank")}
                   >
                     <Video className="h-4 w-4" />
-                    Join Session
+                    {session.status === "scheduled"
+                      ? "Join Session"
+                      : "Session Completed"}
                   </Button>
                 )}
-
                 <Button
                   variant="outline"
                   size="sm"

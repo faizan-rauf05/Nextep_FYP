@@ -16,15 +16,14 @@ export default function StudentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
   const fetchStudents = async () => {
+    console.log("fetch");
     try {
       setLoading(true);
       const res = await fetch("/api/students/getAllStudents");
       const data = await res.json();
+
+      console.log(data);
 
       setStudents(data.students);
       setTotalStudents(data.totalStudents);
@@ -48,6 +47,10 @@ export default function StudentsPage() {
 
     fetchStudents();
   };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
   // ✅ Toggle Student Status (PATCH API)
   const toggleStatus = async (student: any) => {

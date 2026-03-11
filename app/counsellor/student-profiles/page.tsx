@@ -1,98 +1,128 @@
-'use client'
+"use client";
 
-import { useState, useMemo, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { StudentCard } from '@/components/counsellor/student-card'
-import { StudentDetailModal } from '@/components/counsellor/student-detail-modal'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Search, Users, TrendingUp } from 'lucide-react'
+import { useState, useMemo, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { StudentCard } from "@/components/counsellor/student-card";
+import { StudentDetailModal } from "@/components/counsellor/student-detail-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Users, TrendingUp } from "lucide-react";
 
 interface Student {
-  id: string
-  name: string
-  email: string
-  educationLevel: string
-  institution: string
-  careerInterests: string[]
-  careerGoals: string
-  sessionsTaken: number
+  id: string;
+  name: string;
+  email: string;
+  educationLevel: string;
+  institution: string;
+  careerInterests: string[];
+  careerGoals: string;
+  sessionsTaken: number;
   counsellingHistory: {
-    date: string
-    topic: string
-  }[]
-  notes?: string
+    date: string;
+    topic: string;
+  }[];
+  notes?: string;
 }
 
-type FilterLevel = 'all' | 'bachelor' | 'master' | 'phd'
+type FilterLevel = "all" | "bachelor" | "master" | "phd";
 
 export default function StudentProfilesPage() {
-  const [students, setStudents] = useState<Student[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterLevel, setFilterLevel] = useState<FilterLevel>('all')
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterLevel, setFilterLevel] = useState<FilterLevel>("all");
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  // ✅ Fetch students assigned to counsellor
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const storedUser = localStorage.getItem('user')
-        if (!storedUser) return
-        const userData = JSON.parse(storedUser)
-        const counsellorId = userData.id || userData._id
+        setLoading(true);
 
-        const res = await fetch(`/api/students/getAssignedStudents?counsellorId=${counsellorId}`)
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.message)
+        const storedUser = localStorage.getItem("user");
 
-        setStudents(data)
+        if (!storedUser) {
+          console.log("User not found in localStorage");
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const counsellorId = userData?._id || userData?.id;
+
+        console.log("Counsellor ID:", counsellorId);
+
+        const res = await fetch(
+          `/api/counsellor/getAssignedStudents?counsellorId=${counsellorId}`,
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch students");
+        }
+
+        console.log("Students:", data);
+
+        setStudents(data);
       } catch (error) {
-        console.error('Error fetching students:', error)
+        console.error("Error fetching students:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStudents()
-  }, [])
+    fetchStudents();
+  }, []);
 
   // Filtered students
   const filteredStudents = useMemo(() => {
-    let result = students
+    let result = students;
 
     if (searchQuery) {
       result = result.filter(
         (s) =>
           s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.careerInterests.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+          s.careerInterests.some((i) =>
+            i.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
+      );
     }
 
-    if (filterLevel !== 'all') {
-      result = result.filter((s) => s.educationLevel.toLowerCase().startsWith(filterLevel))
+    if (filterLevel !== "all") {
+      result = result.filter((s) =>
+        s.educationLevel.toLowerCase().startsWith(filterLevel),
+      );
     }
 
-    return result
-  }, [students, searchQuery, filterLevel])
+    return result;
+  }, [students, searchQuery, filterLevel]);
 
   // Stats
-  const totalStudents = students.length
-  const totalSessions = students.reduce((sum, s) => sum + s.sessionsTaken, 0)
-  const avgSessions = totalStudents ? (totalSessions / totalStudents).toFixed(1) : 0
+  const totalStudents = students.length;
+  const totalSessions = students.reduce((sum, s) => sum + s.sessionsTaken, 0);
+  const avgSessions = totalStudents
+    ? (totalSessions / totalStudents).toFixed(1)
+    : 0;
 
   if (loading) {
-    return <p className="text-center py-12 text-muted-foreground">Loading students...</p>
+    return (
+      <p className="text-center py-12 text-muted-foreground">
+        Loading students...
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Student Profiles</h1>
-        <p className="text-muted-foreground">Manage and view profiles of all students assigned to you</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          Student Profiles
+        </h1>
+        <p className="text-muted-foreground">
+          Manage and view profiles of all students assigned to you
+        </p>
       </div>
 
       {/* Quick Stats */}
@@ -100,8 +130,12 @@ export default function StudentProfilesPage() {
         <Card className="bg-muted/50 border-border">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Students</p>
-              <p className="text-2xl font-bold text-foreground">{totalStudents}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Total Students
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStudents}
+              </p>
             </div>
             <Users className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
@@ -110,8 +144,12 @@ export default function StudentProfilesPage() {
         <Card className="bg-muted/50 border-border">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Sessions</p>
-              <p className="text-2xl font-bold text-foreground">{totalSessions}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Total Sessions
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalSessions}
+              </p>
             </div>
             <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
@@ -120,8 +158,12 @@ export default function StudentProfilesPage() {
         <Card className="bg-muted/50 border-border">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Avg Sessions per Student</p>
-              <p className="text-2xl font-bold text-foreground">{avgSessions}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Avg Sessions per Student
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {avgSessions}
+              </p>
             </div>
             <TrendingUp className="h-8 w-8 text-muted-foreground opacity-50" />
           </CardContent>
@@ -146,7 +188,10 @@ export default function StudentProfilesPage() {
             </div>
           </div>
 
-          <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as FilterLevel)}>
+          <Tabs
+            value={filterLevel}
+            onValueChange={(v) => setFilterLevel(v as FilterLevel)}
+          >
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="all">All Students</TabsTrigger>
               <TabsTrigger value="bachelor">Bachelor</TabsTrigger>
@@ -164,13 +209,13 @@ export default function StudentProfilesPage() {
                   student={{
                     id: student.id,
                     name: student.name,
-                    educationLevel: student.educationLevel.split(' - ')[0],
+                    educationLevel: student.educationLevel.split(" - ")[0],
                     careerInterest: student.careerInterests[0],
                     sessionsTaken: student.sessionsTaken,
                   }}
                   onViewDetails={() => {
-                    setSelectedStudent(student)
-                    setModalOpen(true)
+                    setSelectedStudent(student);
+                    setModalOpen(true);
                   }}
                 />
               ))}
@@ -178,7 +223,9 @@ export default function StudentProfilesPage() {
           ) : (
             <div className="text-center py-12">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-muted-foreground">No students found matching your search.</p>
+              <p className="text-muted-foreground">
+                No students found matching your search.
+              </p>
             </div>
           )}
         </CardContent>
@@ -193,5 +240,5 @@ export default function StudentProfilesPage() {
         />
       )}
     </div>
-  )
+  );
 }
