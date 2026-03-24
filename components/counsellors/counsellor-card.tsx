@@ -79,10 +79,10 @@ export function CounsellorCard({ counsellor }: CounsellorCardProps) {
 
         {/* Price & CTA */}
         <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
-          <div>
+          {/* <div>
             <span className="text-lg font-bold text-foreground">${counsellor.pricePerSession}</span>
             <span className="text-sm text-muted-foreground"> / session</span>
-          </div>
+          </div> */}
           <Button
             variant="outline"
             className="rounded-full px-5 font-medium group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300 bg-transparent"

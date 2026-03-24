@@ -22,9 +22,8 @@ const navItems = [
   { label: "Dashboard", href: "/student", icon: LayoutDashboard },
   { label: "Book a Session", href: "/student/book-session", icon: Calendar },
   { label: "My Sessions", href: "/student/my-sessions", icon: BookOpen },
-  // { label: "Career Recommendations", href: "/student/recommendations", icon: Lightbulb },
-  // { label: "Messages", href: "/student/messages", icon: MessageSquare },
-  // { label: "Payments", href: "/student/payments", icon: CreditCard },
+  { label: "Roadmaps", href: "/student/roadmap", icon: BookOpen },
+  { label: "Chat Bot", href: "/student/chat", icon: BookOpen },
   { label: "Profile Settings", href: "/student/settings", icon: User },
 ]
 
@@ -34,8 +33,8 @@ export function StudentSidebar() {
   const router = useRouter()
 
   const handleLogout = () => {
-    localStorage.clear() // clear all stored data
-    router.push("/") // redirect to home
+    localStorage.clear() 
+    router.push("/") 
   }
 
   return (

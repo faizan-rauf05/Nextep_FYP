@@ -38,11 +38,13 @@ export async function GET(req: NextRequest) {
       specializations: c.specialization || [],
       rating: c.rating || 0,
       reviews: c.reviews || 0,
+      experience: c.experience || 0,
       totalSessions: c.totalSessions || 0,
       completionRate: c.completionRate || 0,
       pricePerSession: c.pricePerSession || 0,
       status: c.status || "pending",
       availability: c.availability || "Available",
+      photo: c.image || c.photo || "",
       joinedDate: c.createdAt,
     }));
 

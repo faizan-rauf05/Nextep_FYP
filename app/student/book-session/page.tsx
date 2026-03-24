@@ -12,12 +12,16 @@ import { BookingConfirmation } from "@/components/student/booking-confirmation";
 type Counsellor = {
   id: string;
   name: string;
+  email: string;
   headline: string;
-  specializations: string;
+  specializations: string[];
   availability: string[];
   pricePerSession: number;
   rating: number;
+  photo: string;
   reviews: number;
+  totalSessions: number;
+  experience: number;
 };
 
 const SESSION_TYPES = {
@@ -52,10 +56,14 @@ type Step =
 
 export default function BookSessionPage() {
   const [currentStep, setCurrentStep] = useState<Step>("counsellor");
-  const [selectedCounsellorId, setSelectedCounsellorId] = useState<string | null>(null);
+  const [selectedCounsellorId, setSelectedCounsellorId] = useState<
+    string | null
+  >(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedSessionType, setSelectedSessionType] = useState<string | null>(null);
+  const [selectedSessionType, setSelectedSessionType] = useState<string | null>(
+    null,
+  );
 
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [studentId, setStudentId] = useState<string | null>(null);
@@ -64,7 +72,7 @@ export default function BookSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get Student ID
+  // Get Student ID from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -82,7 +90,29 @@ export default function BookSessionPage() {
 
         if (!res.ok) throw new Error(data.message);
 
-        setCounsellors(data.formatted);
+        console.log("data", data);
+
+        // Normalize data
+        const formatted = data.formatted.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          headline: c.headline || "",
+          specializations: Array.isArray(c.specializations)
+            ? c.specializations
+            : [c.specializations],
+          availability: Array.isArray(c.availability)
+            ? c.availability
+            : [c.availability || "Available"],
+          pricePerSession: c.pricePerSession || 0,
+          rating: c.rating || 0,
+          photo: c.photo || "",
+          reviews: c.reviews || 0,
+          totalSessions: c.totalSessions || 0,
+          experience: c.experience || 0, // ✅ add this line
+        }));
+
+        setCounsellors(formatted);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -94,7 +124,7 @@ export default function BookSessionPage() {
   }, []);
 
   const selectedCounsellor = counsellors.find(
-    (c) => c.id === selectedCounsellorId
+    (c) => c.id === selectedCounsellorId,
   );
 
   const handleStepOne = () => {
@@ -109,7 +139,6 @@ export default function BookSessionPage() {
     if (selectedSessionType) setCurrentStep("confirmation");
   };
 
-  // Booking API
   const handleConfirmBooking = async () => {
     if (
       !studentId ||
@@ -130,9 +159,7 @@ export default function BookSessionPage() {
 
       const res = await fetch("/api/meetings/createMeetings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           student: studentId,
           counsellor: selectedCounsellor.id,
@@ -172,7 +199,6 @@ export default function BookSessionPage() {
           <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
           <h1 className="text-3xl font-bold">Session Booked!</h1>
           <p>Your counseling session has been successfully booked.</p>
-
           <Button onClick={handleStartOver}>Book Another Session</Button>
         </div>
       </div>
@@ -182,28 +208,23 @@ export default function BookSessionPage() {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         {/* MAIN */}
         <div className="lg:col-span-2">
-
           {currentStep === "counsellor" && (
             <>
-              <h2 className="text-xl font-semibold mb-6">
-                Select a Counselor
-              </h2>
-
+              <h2 className="text-xl font-semibold mb-6">Select a Counselor</h2>
               {loadingCounsellors && <p>Loading...</p>}
               {error && <p className="text-red-500">{error}</p>}
-
               {counsellors.map((c) => (
                 <CounsellorCard
-                  key={c.id}
                   counsellor={{
                     id: c.id,
                     name: c.name,
-                    photo: "",
-                    specialization: c.specializations,
-                    experience: 0,
+                    photo: c.photo,
+                    specialization: Array.isArray(c.specializations)
+                      ? c.specializations.join(", ")
+                      : c.specializations,
+                    experience: c.experience,
                     rating: c.rating,
                     totalReviews: c.reviews,
                     availability: c.availability,
@@ -250,7 +271,7 @@ export default function BookSessionPage() {
               <BookingConfirmation
                 counsellor={{
                   name: selectedCounsellor.name,
-                  photo: "",
+                  photo: selectedCounsellor.photo, // ✅ show photo here
                   specialization: selectedCounsellor.specializations,
                   sessionPrice: selectedCounsellor.pricePerSession,
                 }}
@@ -274,30 +295,25 @@ export default function BookSessionPage() {
             <CardHeader>
               <CardTitle>Booking Summary</CardTitle>
             </CardHeader>
-
             <CardContent className="space-y-4">
-
               {selectedCounsellor && (
                 <div>
                   <p className="text-sm text-muted-foreground">Counsellor</p>
                   <p className="font-semibold">{selectedCounsellor.name}</p>
                 </div>
               )}
-
               {selectedDate && (
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p>{selectedDate.toLocaleDateString()}</p>
                 </div>
               )}
-
               {selectedTime && (
                 <div>
                   <p className="text-sm text-muted-foreground">Time</p>
                   <p>{selectedTime}</p>
                 </div>
               )}
-
               {selectedSessionType && (
                 <div>
                   <p className="text-sm text-muted-foreground">Session</p>
@@ -312,7 +328,6 @@ export default function BookSessionPage() {
               )}
 
               <div className="pt-4 border-t space-y-2">
-
                 {currentStep === "counsellor" && (
                   <Button
                     className="w-full"
@@ -322,7 +337,6 @@ export default function BookSessionPage() {
                     Continue
                   </Button>
                 )}
-
                 {currentStep === "datetime" && (
                   <Button
                     className="w-full"
@@ -332,7 +346,6 @@ export default function BookSessionPage() {
                     Continue
                   </Button>
                 )}
-
                 {currentStep === "sessiontype" && (
                   <Button
                     className="w-full"
