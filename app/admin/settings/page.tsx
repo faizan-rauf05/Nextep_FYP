@@ -24,6 +24,8 @@ export default function SettingsPage() {
 
     const data = await res.json()
 
+     console.log("res" , data);
+
     setForm({
       firstName: data.firstName || "",
       lastName: data.lastName || "",

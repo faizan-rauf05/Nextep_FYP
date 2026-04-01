@@ -3,7 +3,6 @@ import { connectDB } from "@/lib/mongodb"
 import User from "@/models/User"
 
 export async function GET() {
-console.log("first")
   await connectDB()
 
   const admin = await User.findOne({ role: "admin" })
