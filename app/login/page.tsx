@@ -14,15 +14,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, AlertTriangle, Mail } from "lucide-react";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInactive, setIsInactive] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setIsInactive(false);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
@@ -38,6 +40,10 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (!res.ok) {
+      if (data.status === "inactive" || data.message?.toLowerCase().includes("inactive")) {
+        setIsInactive(true);
+        return;
+      }
       alert(data.message);
       return;
     }
@@ -51,6 +57,10 @@ export default function LoginPage() {
     } else {
       window.location.href = "/student";
     }
+  };
+
+  const handleTryAgain = () => {
+    setIsInactive(false);
   };
 
   return (
@@ -85,6 +95,44 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
+            {/* Inactive Account Alert */}
+            {isInactive && (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-red-800">
+                        Account Inactive
+                      </h4>
+                      <p className="mt-1 text-sm text-red-700">
+                        Your profile is inactive. Please contact admin to restore access.
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <a
+                          href="mailto:admin@pathfinder.com"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700 hover:text-red-800 transition-colors"
+                        >
+                          <Mail className="h-4 w-4" />
+                          Contact Admin
+                        </a>
+                        <span className="text-red-300">|</span>
+                        <button
+                          type="button"
+                          onClick={handleTryAgain}
+                          className="text-sm font-medium text-red-700 hover:text-red-800 transition-colors underline underline-offset-2"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
@@ -138,7 +186,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-11 rounded-lg font-medium"
-                disabled={isLoading}
+                disabled={isLoading || isInactive}
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
