@@ -14,15 +14,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, AlertTriangle, X } from "lucide-react";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInactive, setIsInactive] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setIsInactive(false);
+    setShowAlert(false);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
@@ -37,7 +41,15 @@ export default function LoginPage() {
     const data = await res.json();
     setIsLoading(false);
 
+    console.log(data, "data");
+
     if (!res.ok) {
+      // Check if the user status is inactive
+      if (data.status === "inactive" || data.message?.toLowerCase().includes("inactive")) {
+        setIsInactive(true);
+        setShowAlert(true);
+        return;
+      }
       alert(data.message);
       return;
     }
@@ -51,6 +63,11 @@ export default function LoginPage() {
     } else {
       window.location.href = "/student";
     }
+  };
+
+  const handleTryAgain = () => {
+    setIsInactive(false);
+    setShowAlert(false);
   };
 
   return (
@@ -85,6 +102,52 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
+            {/* Inactive Account Alert */}
+            {showAlert && isInactive && (
+              <div className="mb-6 animate-fade-in-down">
+                <div className="relative rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAlert(false)}
+                    className="absolute right-3 top-3 text-destructive/60 hover:text-destructive transition-colors"
+                    aria-label="Dismiss alert"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10">
+                        <AlertTriangle className="h-4 w-4 text-destructive" />
+                      </div>
+                    </div>
+                    <div className="flex-1 pr-6">
+                      <h4 className="text-sm font-medium text-destructive">
+                        Account Inactive
+                      </h4>
+                      <p className="mt-1 text-sm text-destructive/80">
+                        Your profile is inactive. Please contact admin.
+                      </p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <a
+                          href="mailto:support@pathfinder.com"
+                          className="inline-flex items-center text-xs font-medium text-destructive hover:text-destructive/80 underline underline-offset-2 transition-colors"
+                        >
+                          Contact Admin
+                        </a>
+                        <button
+                          type="button"
+                          onClick={handleTryAgain}
+                          className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
@@ -138,9 +201,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-11 rounded-lg font-medium"
-                disabled={isLoading}
+                disabled={isLoading || isInactive}
               >
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Signing in..." : isInactive ? "Account Inactive" : "Sign in"}
               </Button>
             </form>
 
