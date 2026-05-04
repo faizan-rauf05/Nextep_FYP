@@ -38,13 +38,13 @@ export function StudentHeader() {
       </Sheet>
 
       {/* Search */}
-      <div className="hidden md:flex items-center flex-1 max-w-md">
+      <div className="hidden md:flex items-center flex-1 max-w-md visibility-hidden">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
+          {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> */}
+          {/* <Input
             placeholder="Search counsellors, sessions..."
             className="pl-10 bg-muted/50 border-0 focus-visible:ring-1"
-          />
+          /> */}
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export function StudentHeader() {
         </Button>
 
         {/* Notifications */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
@@ -76,7 +76,7 @@ export function StudentHeader() {
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         {/* Profile */}
         <DropdownMenu>
@@ -88,35 +88,7 @@ export function StudentHeader() {
               <span className="hidden sm:inline text-sm font-medium">Student</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Dashboards</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a href="/admin">Admin Dashboard</a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="/student">Student Dashboard</a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="/counsellor">Counsellor Dashboard</a>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+          
         </DropdownMenu>
       </div>
     </header>

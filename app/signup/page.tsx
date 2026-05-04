@@ -158,7 +158,7 @@ function StudentSignupForm() {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="education-university">University</Label>
+          <Label htmlFor="education-university">College</Label>
           <Input
             id="education-university"
             name="education.university"

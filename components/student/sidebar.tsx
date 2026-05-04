@@ -25,7 +25,6 @@ const navItems = [
   { label: "Roadmaps", href: "/student/roadmap", icon: BookOpen },
   { label: "Chat Bot", href: "/student/chat", icon: BookOpen },
   { label: "Profile Settings", href: "/student/settings", icon: User },
-  { label: "Interview", href: "/student/interview", icon: User },
 ]
 
 export function StudentSidebar() {

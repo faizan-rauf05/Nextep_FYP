@@ -34,19 +34,19 @@ export function Navigation() {
             >
               Home
             </Link>
-            <Link 
+            {/* <Link 
               href="/counsellors" 
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               Counsellors
-            </Link>
+            </Link> */}
             <Link 
               href="#how-it-works" 
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               How it Works
             </Link>
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 outline-none">
                 Dashboard
                 <ChevronDown className="h-4 w-4" />
@@ -71,7 +71,7 @@ export function Navigation() {
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
 
           {/* CTA Buttons */}

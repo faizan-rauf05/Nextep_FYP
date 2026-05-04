@@ -1,81 +1,111 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
   try {
-    const { topic, level, duration } = await req.json();
+    const body = await req.json();
 
-    console.log(topic, level, duration);
+    const {
+      education,
+      career,
+      skillLevel,
+      skills,
+      hoursPerDay,
+      goal,
+      preference,
+      challenges,
+    } = body;
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3-flash-preview", // <== stable, free
-    });
-
+    // 🔥 STRICT PROMPT (VERY IMPORTANT)
     const prompt = `
-You are an expert curriculum designer and learning strategist.
+You are an expert AI Roadmap Generator.
 
-Create a **highly detailed learning roadmap** for the following:
+Return ONLY valid JSON.
 
-Topic: ${topic}
-Level: ${level}
-Duration: ${duration}
+USER PROFILE:
+Education: ${education}
+Career: ${career}
+Skill Level: ${skillLevel}
+Skills: ${skills}
+Hours/Day: ${hoursPerDay}
+Goal: ${goal}
+Learning Style: ${preference}
+Challenges: ${challenges}
 
-Rules:
-- Divide the roadmap into progressive weeks according to the duration
-- For each week, include:
-  - Topics to study
-  - **Text-based resources only** (articles, blogs, documentation, guides, tutorials). Do NOT include videos.
-  - Projects or practical exercises for applying knowledge
-- Only return **valid JSON**, no extra text or markdown
-- Follow this exact JSON format:
-
+FORMAT:
 {
-  "title": "string",
-  "description": "brief description of the roadmap",
-  "weeks": [
+  "title": string,
+  "roadmap": [
     {
-      "week": 1,
-      "topics": ["string"],
-      "resources": [{"title":"string","url":"https://..."}],
-      "project": "string"
+      "week": number,
+      "focus": string,
+      "topics": string[],
+      "project": string
     }
   ]
 }
 
-Notes:
-- Make the roadmap progressive: skills should build each week.
-- Include real-world applications in projects.
-- Keep it concise, professional, and detailed.
-- Use at least 2-3 text-based resources per week.
+Rules:
+- Make 6 to 10 weeks roadmap
+- Each week must build on previous
+- Include practical projects
+- No explanation, ONLY JSON
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            {
+              role: "system",
+              content: "Return ONLY valid JSON. No extra text.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.7,
+        }),
+      }
+    );
 
-    // ✅ Safe JSON parsing
-    let parsed;
-    try {
-      const match = text.match(/\{[\s\S]*\}/); // extract JSON block
-      parsed = match ? JSON.parse(match[0]) : null;
-    } catch {
-      parsed = null;
-    }
+    const data = await response.json();
 
-    if (!parsed) {
+    const text = data?.choices?.[0]?.message?.content;
+
+    if (!text) {
       return NextResponse.json(
-        { error: "Failed to parse AI output", raw: text },
-        { status: 500 },
+        { error: "No response from AI" },
+        { status: 500 }
       );
     }
 
-    console.log(parsed);
+    // safe JSON parse
+    let parsed;
+
+    try {
+      parsed = JSON.parse(text);
+    } catch (err) {
+      console.log("RAW AI OUTPUT:", text);
+
+      return NextResponse.json(
+        { error: "Invalid JSON from AI", raw: text },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(parsed);
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message },
+      { status: 500 }
+    );
   }
 }

@@ -168,12 +168,12 @@ export default function LoginPage() {
                   <Label htmlFor="password" className="text-sm font-medium">
                     Password
                   </Label>
-                  <Link
+                  {/* <Link
                     href="#"
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Forgot password?
-                  </Link>
+                  </Link> */}
                 </div>
                 <div className="relative">
                   <Input
@@ -219,7 +219,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border" />
@@ -270,7 +270,13 @@ export default function LoginPage() {
                   GitHub
                 </Button>
               </div>
-            </div>
+            </div> */}
+            <div className="mt-6 p-4 border rounded-lg bg-muted/30 text-xs">
+  <p className="font-semibold mb-2">Demo Credentials:</p>
+  <p>Student: student@test.com / 123456</p>
+  <p>Counsellor: counsellor@test.com / 123456</p>
+  <p>Admin: admin@test.com / 123456</p>
+</div>
           </CardContent>
         </Card>
       </main>

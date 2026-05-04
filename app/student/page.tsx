@@ -36,6 +36,7 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    console.log("storedUser", storedUser);
     if (storedUser) {
       const userData = JSON.parse(storedUser); // parse string to object
       console.log(userData.id);

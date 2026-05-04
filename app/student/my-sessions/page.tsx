@@ -69,6 +69,8 @@ export default function MySessionsPage() {
 
         const data = await res.json();
 
+        console.log("dataaaaaaa", data)
+
         const formatted: Session[] = data.map((meeting: any) => ({
           id: meeting._id,
           counsellorId: meeting.counsellor?._id,

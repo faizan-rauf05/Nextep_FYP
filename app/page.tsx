@@ -13,7 +13,7 @@ export default function HomePage() {
       <Navigation />
       <Hero />
       <HowItWorks />
-      <Counsellors />
+      {/* <Counsellors /> */}
       <CareerCategories />
       <Testimonials />
       <CTA />

@@ -17,7 +17,7 @@ interface Session {
   time: string;
   sessionType: string;
   duration: string;
-  status: "scheduled" | "completed" | "cancelled";
+  status: "scheduled" | "completed" | "cancelled" | "upcoming";
   notes?: string;
   feedback?: {
     rating: number;
@@ -57,6 +57,7 @@ const getStatusLabel = (status: string) => {
 };
 
 export function SessionCard({ session }: SessionCardProps) {
+  console.log("session", session);
   const [showDetail, setShowDetail] = useState(false);
   const formattedDate = session.date.toLocaleDateString("en-US", {
     weekday: "short",

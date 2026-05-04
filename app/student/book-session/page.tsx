@@ -25,45 +25,20 @@ type Counsellor = {
 };
 
 const SESSION_TYPES = {
-  "career-guidance": {
-    title: "Career Guidance",
-    duration: "30 mins",
-    price: 1000,
-  },
-  "resume-review": {
-    title: "Resume Review",
-    duration: "30 mins",
-    price: 1000,
-  },
-  "interview-prep": {
-    title: "Interview Preparation",
-    duration: "45 mins",
-    price: 1500,
-  },
-  "career-assessment": {
-    title: "Career Assessment",
-    duration: "60 mins",
-    price: 2000,
-  },
+  "career-guidance": { title: "Career Guidance", duration: "30 mins", price: 1000 },
+  "resume-review": { title: "Resume Review", duration: "30 mins", price: 1000 },
+  "interview-prep": { title: "Interview Preparation", duration: "45 mins", price: 1500 },
+  "career-assessment": { title: "Career Assessment", duration: "60 mins", price: 2000 },
 };
 
-type Step =
-  | "counsellor"
-  | "datetime"
-  | "sessiontype"
-  | "confirmation"
-  | "success";
+type Step = "counsellor" | "datetime" | "sessiontype" | "confirmation" | "success";
 
 export default function BookSessionPage() {
   const [currentStep, setCurrentStep] = useState<Step>("counsellor");
-  const [selectedCounsellorId, setSelectedCounsellorId] = useState<
-    string | null
-  >(null);
+  const [selectedCounsellorId, setSelectedCounsellorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedSessionType, setSelectedSessionType] = useState<string | null>(
-    null,
-  );
+  const [selectedSessionType, setSelectedSessionType] = useState<string | null>(null);
 
   const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
   const [studentId, setStudentId] = useState<string | null>(null);
@@ -72,7 +47,9 @@ export default function BookSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get Student ID from localStorage
+  // 🔍 Search state
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -81,7 +58,6 @@ export default function BookSessionPage() {
     }
   }, []);
 
-  // Fetch counsellors
   useEffect(() => {
     const fetchCounsellors = async () => {
       try {
@@ -90,9 +66,6 @@ export default function BookSessionPage() {
 
         if (!res.ok) throw new Error(data.message);
 
-        console.log("data", data);
-
-        // Normalize data
         const formatted = data.formatted.map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -109,7 +82,7 @@ export default function BookSessionPage() {
           photo: c.photo || "",
           reviews: c.reviews || 0,
           totalSessions: c.totalSessions || 0,
-          experience: c.experience || 0, // ✅ add this line
+          experience: c.experience || 0,
         }));
 
         setCounsellors(formatted);
@@ -123,30 +96,18 @@ export default function BookSessionPage() {
     fetchCounsellors();
   }, []);
 
-  const selectedCounsellor = counsellors.find(
-    (c) => c.id === selectedCounsellorId,
+  const filteredCounsellors = counsellors.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleStepOne = () => {
-    if (selectedCounsellorId) setCurrentStep("datetime");
-  };
+  const selectedCounsellor = counsellors.find((c) => c.id === selectedCounsellorId);
 
-  const handleStepTwo = () => {
-    if (selectedDate && selectedTime) setCurrentStep("sessiontype");
-  };
-
-  const handleStepThree = () => {
-    if (selectedSessionType) setCurrentStep("confirmation");
-  };
+  const handleStepOne = () => selectedCounsellorId && setCurrentStep("datetime");
+  const handleStepTwo = () => selectedDate && selectedTime && setCurrentStep("sessiontype");
+  const handleStepThree = () => selectedSessionType && setCurrentStep("confirmation");
 
   const handleConfirmBooking = async () => {
-    if (
-      !studentId ||
-      !selectedCounsellor ||
-      !selectedDate ||
-      !selectedTime ||
-      !selectedSessionType
-    ) {
+    if (!studentId || !selectedCounsellor || !selectedDate || !selectedTime || !selectedSessionType) {
       alert("Please complete all steps");
       return;
     }
@@ -154,8 +115,7 @@ export default function BookSessionPage() {
     setIsLoading(true);
 
     try {
-      const sessionData =
-        SESSION_TYPES[selectedSessionType as keyof typeof SESSION_TYPES];
+      const sessionData = SESSION_TYPES[selectedSessionType as keyof typeof SESSION_TYPES];
 
       const res = await fetch("/api/meetings/createMeetings", {
         method: "POST",
@@ -173,7 +133,6 @@ export default function BookSessionPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message);
 
       setCurrentStep("success");
@@ -194,8 +153,8 @@ export default function BookSessionPage() {
 
   if (currentStep === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <div className="min-h-screen flex items-center justify-center text-center">
+        <div>
           <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
           <h1 className="text-3xl font-bold">Session Booked!</h1>
           <p>Your counseling session has been successfully booked.</p>
@@ -207,158 +166,133 @@ export default function BookSessionPage() {
 
   return (
     <div className="min-h-screen p-6">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+
         {/* MAIN */}
         <div className="lg:col-span-2">
+
+          {/* 🔥 Search + Title */}
           {currentStep === "counsellor" && (
             <>
-              <h2 className="text-xl font-semibold mb-6">Select a Counselor</h2>
+              <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                <h2 className="text-xl font-semibold">Select a Counselor</h2>
+
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search counsellor..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-10 pl-10 pr-4 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-primary/20"
+                  />
+
+                  <svg
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeWidth="2" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
+                  </svg>
+                </div>
+              </div>
+
               {loadingCounsellors && <p>Loading...</p>}
               {error && <p className="text-red-500">{error}</p>}
-              {counsellors.map((c) => (
-                <CounsellorCard
-                  counsellor={{
-                    id: c.id,
-                    name: c.name,
-                    photo: c.photo,
-                    specialization: Array.isArray(c.specializations)
-                      ? c.specializations.join(", ")
-                      : c.specializations,
-                    experience: c.experience,
-                    rating: c.rating,
-                    totalReviews: c.reviews,
-                    availability: c.availability,
-                    sessionPrice: c.pricePerSession,
-                    bio: c.headline,
-                  }}
-                  isSelected={selectedCounsellorId === c.id}
-                  onSelect={setSelectedCounsellorId}
-                />
-              ))}
+
+              {filteredCounsellors.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No counsellors found.</p>
+              ) : (
+                filteredCounsellors.map((c) => (
+                  <CounsellorCard
+                    key={c.id}
+                    counsellor={{
+                      id: c.id,
+                      name: c.name,
+                      photo: c.photo,
+                      specialization: c.specializations.join(", "),
+                      experience: c.experience,
+                      rating: c.rating,
+                      totalReviews: c.reviews,
+                      availability: c.availability,
+                      sessionPrice: c.pricePerSession,
+                      bio: c.headline,
+                    }}
+                    isSelected={selectedCounsellorId === c.id}
+                    onSelect={setSelectedCounsellorId}
+                  />
+                ))
+              )}
             </>
           )}
 
+          {/* Rest remains SAME */}
           {currentStep === "datetime" && selectedCounsellor && (
-            <Card>
-              <CardContent className="p-6">
-                <DateTimeSelection
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
-                  onDateChange={setSelectedDate}
-                  onTimeChange={setSelectedTime}
-                  availableTimeSlots={selectedCounsellor.availability}
-                />
-              </CardContent>
-            </Card>
+            <Card><CardContent className="p-6">
+              <DateTimeSelection
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onDateChange={setSelectedDate}
+                onTimeChange={setSelectedTime}
+                availableTimeSlots={selectedCounsellor.availability}
+              />
+            </CardContent></Card>
           )}
 
           {currentStep === "sessiontype" && (
-            <Card>
-              <CardContent className="p-6">
-                <SessionTypeSelection
-                  selectedType={selectedSessionType}
-                  onTypeChange={setSelectedSessionType}
-                />
-              </CardContent>
-            </Card>
+            <Card><CardContent className="p-6">
+              <SessionTypeSelection
+                selectedType={selectedSessionType}
+                onTypeChange={setSelectedSessionType}
+              />
+            </CardContent></Card>
           )}
 
-          {currentStep === "confirmation" &&
-            selectedCounsellor &&
-            selectedDate &&
-            selectedTime &&
-            selectedSessionType && (
-              <BookingConfirmation
-                counsellor={{
-                  name: selectedCounsellor.name,
-                  photo: selectedCounsellor.photo, // ✅ show photo here
-                  specialization: selectedCounsellor.specializations,
-                  sessionPrice: selectedCounsellor.pricePerSession,
-                }}
-                date={selectedDate}
-                time={selectedTime}
-                sessionType={
-                  SESSION_TYPES[
-                    selectedSessionType as keyof typeof SESSION_TYPES
-                  ]
-                }
-                onConfirm={handleConfirmBooking}
-                onCancel={() => setCurrentStep("counsellor")}
-                isLoading={isLoading}
-              />
-            )}
+          {currentStep === "confirmation" && selectedCounsellor && selectedDate && selectedTime && selectedSessionType && (
+            <BookingConfirmation
+              counsellor={{
+                name: selectedCounsellor.name,
+                photo: selectedCounsellor.photo,
+                specialization: selectedCounsellor.specializations,
+                sessionPrice: selectedCounsellor.pricePerSession,
+              }}
+              date={selectedDate}
+              time={selectedTime}
+              sessionType={SESSION_TYPES[selectedSessionType as keyof typeof SESSION_TYPES]}
+              onConfirm={handleConfirmBooking}
+              onCancel={() => setCurrentStep("counsellor")}
+              isLoading={isLoading}
+            />
+          )}
         </div>
 
-        {/* SIDEBAR */}
+        {/* SIDEBAR SAME */}
         <div>
           <Card>
-            <CardHeader>
-              <CardTitle>Booking Summary</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Booking Summary</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              {selectedCounsellor && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Counsellor</p>
-                  <p className="font-semibold">{selectedCounsellor.name}</p>
-                </div>
-              )}
-              {selectedDate && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p>{selectedDate.toLocaleDateString()}</p>
-                </div>
-              )}
-              {selectedTime && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
-                  <p>{selectedTime}</p>
-                </div>
-              )}
-              {selectedSessionType && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Session</p>
-                  <p>
-                    {
-                      SESSION_TYPES[
-                        selectedSessionType as keyof typeof SESSION_TYPES
-                      ].title
-                    }
-                  </p>
-                </div>
-              )}
 
-              <div className="pt-4 border-t space-y-2">
+              {selectedCounsellor && <div><p className="text-sm">Counsellor</p><p className="font-semibold">{selectedCounsellor.name}</p></div>}
+              {selectedDate && <div><p className="text-sm">Date</p><p>{selectedDate.toLocaleDateString()}</p></div>}
+              {selectedTime && <div><p className="text-sm">Time</p><p>{selectedTime}</p></div>}
+              {selectedSessionType && <div><p className="text-sm">Session</p><p>{SESSION_TYPES[selectedSessionType as keyof typeof SESSION_TYPES].title}</p></div>}
+
+              <div className="pt-4 border-t">
                 {currentStep === "counsellor" && (
-                  <Button
-                    className="w-full"
-                    disabled={!selectedCounsellorId}
-                    onClick={handleStepOne}
-                  >
-                    Continue
-                  </Button>
+                  <Button className="w-full" disabled={!selectedCounsellorId} onClick={handleStepOne}>Continue</Button>
                 )}
                 {currentStep === "datetime" && (
-                  <Button
-                    className="w-full"
-                    disabled={!selectedDate || !selectedTime}
-                    onClick={handleStepTwo}
-                  >
-                    Continue
-                  </Button>
+                  <Button className="w-full" disabled={!selectedDate || !selectedTime} onClick={handleStepTwo}>Continue</Button>
                 )}
                 {currentStep === "sessiontype" && (
-                  <Button
-                    className="w-full"
-                    disabled={!selectedSessionType}
-                    onClick={handleStepThree}
-                  >
-                    Review Booking
-                  </Button>
+                  <Button className="w-full" disabled={!selectedSessionType} onClick={handleStepThree}>Review Booking</Button>
                 )}
               </div>
+
             </CardContent>
           </Card>
         </div>
+
       </div>
     </div>
   );
