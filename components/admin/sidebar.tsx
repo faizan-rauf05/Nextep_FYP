@@ -46,7 +46,7 @@ export function AdminSidebar() {
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
         {!collapsed && (
           <Link href="/admin" className="font-semibold text-lg tracking-tight">
-            PathFinder
+            <img src="/logo.png" alt="NexStep" />
           </Link>
         )}
 

@@ -1,63 +1,150 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export function CTA() {
   return (
-    <section className="py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden">
-          {/* Background Image Placeholder */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent">
-            {/* Overlay pattern */}
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
-          </div>
+    <section
+      className="relative overflow-hidden py-24 md:py-32"
+      style={{
+        background:
+          "linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)",
+      }}
+    >
+      {/* Outer blobs */}
+      <div
+        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl"
+        style={{ background: "rgba(0, 99, 196, 0.2)" }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full blur-3xl"
+        style={{ background: "rgba(0, 99, 196, 0.15)" }}
+      />
 
-          {/* Content */}
-          <div className="relative px-6 py-20 md:py-28 flex flex-col lg:flex-row items-center gap-12">
-            {/* Left - Image Placeholder */}
-            {/* Left - Image */}
-            <div className="hidden lg:block w-1/3">
-              <div className="relative aspect-square rounded-2xl overflow-hidden border border-primary-foreground/20">
-                <img
-                  src="/cta.jpg" // 👈 put your image in public/images
-                  alt="Career Growth"
-                  className="w-full h-full object-cover"
-                />
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Card */}
+        <div
+          className="relative rounded-3xl overflow-hidden p-[1px]"
+          style={{
+            background: "linear-gradient(135deg, #0063c4, rgba(0,99,196,0.2))",
+          }}
+        >
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(0,99,196,0.15) 0%, rgba(0,30,80,0.6) 100%)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            {/* Inner glow blobs */}
+            <div
+              className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full blur-3xl"
+              style={{ background: "rgba(0, 99, 196, 0.3)" }}
+            />
+            <div
+              className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full blur-3xl"
+              style={{ background: "rgba(96, 165, 250, 0.15)" }}
+            />
 
-                {/* Optional overlay for better look */}
-                <div className="absolute inset-0 bg-black/20" />
+            {/* Subtle dot pattern */}
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage:
+                  "radial-gradient(rgba(96,165,250,0.6) 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+              }}
+            />
+
+            {/* Content */}
+            <div className="relative px-8 py-20 md:py-28 flex flex-col lg:flex-row items-center gap-12">
+              {/* Left - Image */}
+              <div className="hidden lg:block w-1/3 flex-shrink-0">
+                <div
+                  className="relative aspect-square rounded-2xl overflow-hidden p-[1px]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #0063c4, rgba(96,165,250,0.4))",
+                  }}
+                >
+                  <div className="relative h-full w-full rounded-2xl overflow-hidden">
+                    <img
+                      src="/cta.jpg"
+                      alt="Career Growth"
+                      className="w-full h-full object-cover"
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(to top, rgba(0,99,196,0.5), transparent)",
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Right - Text Content */}
-            <div className="flex-1 text-center lg:text-left">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-primary-foreground max-w-xl text-balance">
-                Ready to Take the Next Step in Your Career?
-              </h2>
-              <p className="mt-6 text-lg text-primary-foreground/80 max-w-lg">
-                Join thousands of professionals who have found clarity and
-                direction with PathFinder. Start your journey today.
-              </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  size="lg"
-                  className="rounded-xl px-8 h-14 text-base font-semibold bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg group"
-                  asChild
+              {/* Right - Text */}
+              <div className="flex-1 text-center lg:text-left">
+                {/* Badge */}
+                <span
+                  className="inline-block mb-5 px-4 py-1 rounded-full text-sm font-medium"
+                  style={{
+                    background: "rgba(0, 99, 196, 0.25)",
+                    border: "1px solid rgba(0, 99, 196, 0.6)",
+                    color: "#60a5fa",
+                  }}
                 >
-                  <Link href="/signup">
-                    Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-                {/* <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-xl px-8 h-14 text-base font-semibold border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 transition-all"
-                  asChild
+                  <Sparkles className="inline-block mr-1.5 h-3 w-3" />
+                  Start Today — It&apos;s Free
+                </span>
+
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white max-w-xl text-balance leading-tight">
+                  Ready to Take the Next Step in Your{" "}
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(90deg, #60a5fa, #0063c4)",
+                    }}
+                  >
+                    Career?
+                  </span>
+                </h2>
+
+                <p
+                  className="mt-6 text-lg max-w-lg"
+                  style={{ color: "#94a3b8" }}
                 >
-                  <Link href="/counsellors">Browse Counsellors</Link>
-                </Button> */}
+                  Join thousands of professionals who have found clarity and
+                  direction with PathFinder. Start your journey today.
+                </p>
+
+                <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Button
+                    size="lg"
+                    className="rounded-xl px-8 h-14 text-base font-semibold text-white transition-all group border-0"
+                    style={{
+                      background: "linear-gradient(135deg, #0063c4, #004a93)",
+                      boxShadow: "0 8px 32px rgba(0, 99, 196, 0.45)",
+                    }}
+                    asChild
+                  >
+                    <Link href="/signup">
+                      Get Started Free
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+
+                  
+                </div>
+
+                {/* Trust strip */}
+                <p className="mt-8 text-sm" style={{ color: "#ffffff" }}>
+                  No credit card required &nbsp;·&nbsp; Cancel anytime
+                  &nbsp;·&nbsp; 10,000+ students guided
+                </p>
               </div>
             </div>
           </div>

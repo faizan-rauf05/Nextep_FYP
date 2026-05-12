@@ -1,7 +1,6 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
 interface SessionTypeSelectionProps {
@@ -40,36 +39,70 @@ const SESSION_TYPES = [
   },
 ]
 
-export function SessionTypeSelection({ selectedType, onTypeChange }: SessionTypeSelectionProps) {
+export function SessionTypeSelection({
+  selectedType,
+  onTypeChange,
+}: SessionTypeSelectionProps) {
   return (
     <div>
-      <h3 className="font-semibold mb-4">Select Session Type</h3>
+      <h3 className="font-semibold mb-4 text-white">
+        Select Session Type
+      </h3>
+
       <div className="grid gap-3 md:grid-cols-2">
-        {SESSION_TYPES.map((type) => (
-          <Card
-            key={type.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedType === type.id ? 'border-foreground ring-2 ring-foreground' : ''
-            }`}
-            onClick={() => onTypeChange(type.id)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h4 className="font-semibold text-foreground">{type.title}</h4>
-                <Badge variant={selectedType === type.id ? 'default' : 'secondary'}>
-                  {type.price}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">{type.description}</p>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span>Duration: {type.duration}</span>
-                {selectedType === type.id && (
-                  <span className="font-medium text-foreground">Selected</span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {SESSION_TYPES.map((type) => {
+          const isSelected = selectedType === type.id
+
+          return (
+            <Card
+              key={type.id}
+              onClick={() => onTypeChange(type.id)}
+              className={`
+                cursor-pointer transition-all duration-200
+                bg-white/5 border border-white/10
+                hover:bg-white/10 hover:border-[#0063c4]/50
+                ${isSelected ? "border-[#0063c4] bg-[#0063c4]/10 ring-2 ring-[#0063c4]/40" : ""}
+              `}
+            >
+              <CardContent className="p-4">
+                
+                {/* Title + Price */}
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-white">
+                    {type.title}
+                  </h4>
+
+                  <Badge
+                    className={`
+                      text-xs
+                      ${isSelected 
+                        ? "bg-[#0063c4] text-white" 
+                        : "bg-white/10 text-slate-300"}
+                    `}
+                  >
+                    {type.price}
+                  </Badge>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-slate-300 mb-3">
+                  {type.description}
+                </p>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span>Duration: {type.duration}</span>
+
+                  {isSelected && (
+                    <span className="text-[#34d399] font-medium">
+                      Selected ✓
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

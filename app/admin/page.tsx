@@ -103,7 +103,7 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard Overview</h1>
           <p className="text-muted-foreground text-sm mt-1">Welcome back, Admin. Here&apos;s what&apos;s happening today.</p>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
+        {/* <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
             <SelectItem value="6months">Last 6 months</SelectItem>
             <SelectItem value="1year">Last year</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       {/* Stats Cards */}

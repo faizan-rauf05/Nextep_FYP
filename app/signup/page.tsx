@@ -413,7 +413,7 @@ export default function SignupPage() {
       <header className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="text-xl font-semibold tracking-tight">
-            PathFinder
+            <img className="w-[210px]" src="/logo.png" alt="" />
           </Link>
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft /> Back to Home

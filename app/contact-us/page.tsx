@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Mail,
   Phone,
@@ -28,23 +25,22 @@ import {
   HelpCircle,
   Briefcase,
   BookOpen,
+  Sparkles,
 } from "lucide-react";
 
-/* ─── Types ─────────────────────────────────────────────────── */
+/* ─── Types ──────────────────────────────────────────────────── */
 interface FormData {
   name: string;
   email: string;
   subject: string;
   message: string;
 }
-
 interface FormErrors {
   name?: string;
   email?: string;
   subject?: string;
   message?: string;
 }
-
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 /* ─── Constants ──────────────────────────────────────────────── */
@@ -57,30 +53,10 @@ const SUBJECT_OPTIONS = [
 ];
 
 const CONTACT_INFO = [
-  {
-    icon: Mail,
-    label: "Email Us",
-    value: "hello@pathfinder.pk",
-    sub: "We reply within 24 hours",
-  },
-  {
-    icon: Phone,
-    label: "Call Us",
-    value: "+92 300 1234567",
-    sub: "Mon – Fri, 9 AM – 6 PM",
-  },
-  {
-    icon: MapPin,
-    label: "Visit Us",
-    value: "Gulberg III, Lahore, Pakistan",
-    sub: "By appointment only",
-  },
-  {
-    icon: Clock,
-    label: "Office Hours",
-    value: "Mon – Fri: 9 AM – 6 PM",
-    sub: "Sat: 10 AM – 2 PM",
-  },
+  { icon: Mail, label: "Email Us", value: "info@nexstep.pk", sub: "We reply within 24 hours" },
+  { icon: Phone, label: "Call Us", value: "+92 300 1234567", sub: "Mon – Fri, 9 AM – 6 PM" },
+  { icon: MapPin, label: "Visit Us", value: "Superior University, Lahore, Pakistan", sub: "By appointment only" },
+  { icon: Clock, label: "Office Hours", value: "Mon – Fri: 9 AM – 6 PM", sub: "Sat: 10 AM – 2 PM" },
 ];
 
 /* ─── Validation ─────────────────────────────────────────────── */
@@ -90,26 +66,41 @@ function validateForm(data: FormData): FormErrors {
     errors.name = "Name must be at least 2 characters.";
   if (!data.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
     errors.email = "Please enter a valid email address.";
-  if (!data.subject)
-    errors.subject = "Please select a subject.";
+  if (!data.subject) errors.subject = "Please select a subject.";
   if (!data.message.trim() || data.message.trim().length < 20)
     errors.message = "Message must be at least 20 characters.";
   return errors;
 }
 
-/* ─── Page Component ─────────────────────────────────────────── */
+/* ─── Shared style ───────────────────────────────────────────── */
+const glassCard: React.CSSProperties = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(0,99,196,0.25)",
+  backdropFilter: "blur(8px)",
+  borderRadius: "1rem",
+};
+
+const inputStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(0,99,196,0.3)",
+  color: "white",
+};
+
+const inputErrorStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(239,68,68,0.6)",
+  color: "white",
+};
+
+/* ─── Page ───────────────────────────────────────────────────── */
 export default function ContactPage() {
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+    name: "", email: "", subject: "", message: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [serverError, setServerError] = useState<string>("");
 
-  /* helpers */
   const updateField = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -118,58 +109,64 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
+    if (Object.keys(validationErrors).length > 0) { setErrors(validationErrors); return; }
     setStatus("loading");
     setServerError("");
-
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Something went wrong.");
-      }
-
+      if (!res.ok || !data.success) throw new Error(data.error || "Something went wrong.");
       setStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (err: unknown) {
       setStatus("error");
-      setServerError(
-        err instanceof Error ? err.message : "An unexpected error occurred."
-      );
+      setServerError(err instanceof Error ? err.message : "An unexpected error occurred.");
     }
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main
+      className="min-h-screen"
+      style={{ background: "linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)" }}
+    >
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-24 text-white">
-        <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-sky-600/20 blur-3xl" />
+      <section className="relative overflow-hidden py-24">
+        <div
+          className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: "rgba(0,99,196,0.25)" }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: "rgba(0,99,196,0.15)" }}
+        />
 
         <div className="relative mx-auto max-w-3xl px-6 text-center">
-          <Badge
-            variant="outline"
-            className="mb-6 border-violet-400/40 bg-violet-500/10 text-violet-300"
+          <span
+            className="inline-block mb-5 px-4 py-1 rounded-full text-sm font-medium"
+            style={{
+              background: "rgba(0,99,196,0.15)",
+              border: "1px solid rgba(0,99,196,0.5)",
+              color: "#60a5fa",
+            }}
           >
+            <Sparkles className="inline-block mr-1.5 h-3 w-3" />
             Get In Touch
-          </Badge>
-          <h1 className="mb-5 text-5xl font-bold leading-tight tracking-tight md:text-6xl">
+          </span>
+
+          <h1 className="mb-5 text-5xl font-bold leading-tight tracking-tight md:text-6xl text-white">
             We&apos;re Here to{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-sky-400 bg-clip-text text-transparent">
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: "linear-gradient(90deg, #60a5fa, #0063c4)" }}
+            >
               Help You
             </span>
           </h1>
-          <p className="text-lg text-slate-300">
+          <p className="text-lg" style={{ color: "#94a3b8" }}>
             Have a question, need guidance, or want to collaborate? Reach out
             and our team will get back to you promptly.
           </p>
@@ -177,235 +174,236 @@ export default function ContactPage() {
       </section>
 
       {/* ── Main Grid ── */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-10 lg:grid-cols-3">
+      <section className="mx-auto max-w-6xl px-6 pb-20">
+        <div className="grid gap-8 lg:grid-cols-3">
+
           {/* ── Left: Contact Info ── */}
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold">Contact Information</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+          <div className="space-y-4">
+            <div className="mb-2">
+              <h2 className="text-xl font-bold text-white">Contact Information</h2>
+              <p className="mt-1 text-sm" style={{ color: "#64748b" }}>
                 Multiple ways to reach the PathFinder team.
               </p>
             </div>
 
             {CONTACT_INFO.map((item) => (
-              <Card
+              <div
                 key={item.label}
-                className="border-0 bg-muted/40 shadow-sm"
+                className="flex items-start gap-4 p-5 transition-all duration-300 cursor-default"
+                style={glassCard}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.border = "1px solid rgba(0,99,196,0.6)";
+                  el.style.boxShadow = "0 8px 32px rgba(0,99,196,0.2)";
+                  el.style.background = "rgba(0,99,196,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.border = "1px solid rgba(0,99,196,0.25)";
+                  el.style.boxShadow = "none";
+                  el.style.background = "rgba(255,255,255,0.04)";
+                }}
               >
-                <CardContent className="flex items-start gap-4 p-5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-900/30">
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      {item.label}
-                    </p>
-                    <p className="mt-0.5 font-semibold text-sm">{item.value}</p>
-                    <p className="text-xs text-muted-foreground">{item.sub}</p>
-                  </div>
-                </CardContent>
-              </Card>
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(0,99,196,0.3), rgba(0,74,147,0.2))",
+                    border: "1px solid rgba(0,99,196,0.4)",
+                  }}
+                >
+                  <item.icon className="h-5 w-5" style={{ color: "#60a5fa" }} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "#60a5fa" }}>
+                    {item.label}
+                  </p>
+                  <p className="mt-0.5 font-semibold text-sm text-white">{item.value}</p>
+                  <p className="text-xs" style={{ color: "#64748b" }}>{item.sub}</p>
+                </div>
+              </div>
             ))}
 
             {/* FAQ nudge */}
-            <Card className="border border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/30">
-              <CardContent className="p-5">
-                <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">
-                  Check our FAQ first!
-                </p>
-                <p className="mt-1 text-xs text-violet-600 dark:text-violet-400">
-                  Many common questions are answered in our Help Centre — you
-                  might get an instant answer without waiting.
-                </p>
-                <Button
-                  variant="link"
-                  className="mt-2 h-auto p-0 text-xs text-violet-700 dark:text-violet-300"
-                >
-                  Visit Help Centre →
-                </Button>
-              </CardContent>
-            </Card>
+            <div
+              className="p-5"
+              style={{
+                background: "rgba(0,99,196,0.12)",
+                border: "1px solid rgba(0,99,196,0.45)",
+                borderRadius: "1rem",
+              }}
+            >
+              <p className="text-sm font-semibold text-white">Check our FAQ first!</p>
+              <p className="mt-1 text-xs" style={{ color: "#94a3b8" }}>
+                Many common questions are answered in our Help Centre — you might get an instant answer without waiting.
+              </p>
+              <button
+                className="mt-3 text-xs font-medium"
+                style={{ color: "#60a5fa" }}
+              >
+                Visit Help Centre →
+              </button>
+            </div>
           </div>
 
           {/* ── Right: Form ── */}
           <div className="lg:col-span-2">
-            <Card className="border-0 shadow-md">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Send Us a Message</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Fill in the form below and we&apos;ll respond within one
-                  business day.
-                </p>
-              </CardHeader>
-
-              <CardContent>
-                {/* Success state */}
-                {status === "success" && (
-                  <Alert className="mb-6 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-700 dark:text-green-300">
-                      Your message has been sent successfully! We&apos;ll get
-                      back to you within 24 hours.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Error state */}
-                {status === "error" && (
-                  <Alert className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
-                    <AlertDescription className="text-red-700 dark:text-red-300">
-                      {serverError}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                  {/* Name + Email */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="name">
-                        Full Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="Ali Raza"
-                        value={formData.name}
-                        onChange={(e) => updateField("name", e.target.value)}
-                        className={errors.name ? "border-red-400 focus-visible:ring-red-400" : ""}
-                        disabled={status === "loading"}
-                      />
-                      {errors.name && (
-                        <p className="text-xs text-red-500">{errors.name}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label htmlFor="email">
-                        Email Address <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="ali@example.com"
-                        value={formData.email}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        className={errors.email ? "border-red-400 focus-visible:ring-red-400" : ""}
-                        disabled={status === "loading"}
-                      />
-                      {errors.email && (
-                        <p className="text-xs text-red-500">{errors.email}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Subject */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="subject">
-                      Subject <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.subject}
-                      onValueChange={(val) => updateField("subject", val)}
-                      disabled={status === "loading"}
-                    >
-                      <SelectTrigger
-                        id="subject"
-                        className={errors.subject ? "border-red-400 focus:ring-red-400" : ""}
-                      >
-                        <SelectValue placeholder="Select a topic…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SUBJECT_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.subject && (
-                      <p className="text-xs text-red-500">{errors.subject}</p>
-                    )}
-                  </div>
-
-                  {/* Message */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="message">
-                      Message <span className="text-red-500">*</span>
-                    </Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Tell us how we can help you…"
-                      rows={6}
-                      value={formData.message}
-                      onChange={(e) => updateField("message", e.target.value)}
-                      className={
-                        errors.message
-                          ? "resize-none border-red-400 focus-visible:ring-red-400"
-                          : "resize-none"
-                      }
-                      disabled={status === "loading"}
-                    />
-                    <div className="flex justify-between">
-                      {errors.message ? (
-                        <p className="text-xs text-red-500">{errors.message}</p>
-                      ) : (
-                        <span />
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {formData.message.length} / 1000
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Submit */}
-                  <Button
-                    type="submit"
-                    className="w-full bg-violet-600 hover:bg-violet-700"
-                    disabled={status === "loading"}
-                    size="lg"
-                  >
-                    {status === "loading" ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending…
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-center text-xs text-muted-foreground">
-                    By submitting this form you agree to our{" "}
-                    <a href="/privacy" className="underline">
-                      Privacy Policy
-                    </a>
-                    .
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Map placeholder ── */}
-      <section className="border-t bg-muted/30 py-12">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex h-56 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-            <div className="text-center">
-              <MapPin className="mx-auto mb-2 h-8 w-8 opacity-40" />
-              <p className="text-sm">
-                Embed a Google Map here — Gulberg III, Lahore
+            <div className="p-8" style={glassCard}>
+              <h2 className="text-xl font-bold text-white mb-1">Send Us a Message</h2>
+              <p className="text-sm mb-6" style={{ color: "#64748b" }}>
+                Fill in the form below and we&apos;ll respond within one business day.
               </p>
+
+              {/* Success */}
+              {status === "success" && (
+                <div
+                  className="flex items-start gap-3 mb-6 p-4 rounded-xl"
+                  style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.35)" }}
+                >
+                  <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" style={{ color: "#34d399" }} />
+                  <p className="text-sm" style={{ color: "#6ee7b7" }}>
+                    Your message has been sent! We&apos;ll get back to you within 24 hours.
+                  </p>
+                </div>
+              )}
+
+              {/* Error */}
+              {status === "error" && (
+                <div
+                  className="flex items-start gap-3 mb-6 p-4 rounded-xl"
+                  style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.35)" }}
+                >
+                  <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" style={{ color: "#f87171" }} />
+                  <p className="text-sm" style={{ color: "#fca5a5" }}>{serverError}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                {/* Name + Email */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-sm" style={{ color: "#cbd5e1" }}>
+                      Full Name <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="Ali Raza"
+                      value={formData.name}
+                      onChange={(e) => updateField("name", e.target.value)}
+                      disabled={status === "loading"}
+                      className="placeholder:text-slate-500"
+                      style={errors.name ? inputErrorStyle : inputStyle}
+                    />
+                    {errors.name && <p className="text-xs text-red-400">{errors.name}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm" style={{ color: "#cbd5e1" }}>
+                      Email Address <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="ali@example.com"
+                      value={formData.email}
+                      onChange={(e) => updateField("email", e.target.value)}
+                      disabled={status === "loading"}
+                      className="placeholder:text-slate-500"
+                      style={errors.email ? inputErrorStyle : inputStyle}
+                    />
+                    {errors.email && <p className="text-xs text-red-400">{errors.email}</p>}
+                  </div>
+                </div>
+
+                {/* Subject */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="subject" className="text-sm" style={{ color: "#cbd5e1" }}>
+                    Subject <span className="text-red-400">*</span>
+                  </Label>
+                  <Select
+                    value={formData.subject}
+                    onValueChange={(val) => updateField("subject", val)}
+                    disabled={status === "loading"}
+                  >
+                    <SelectTrigger
+                      id="subject"
+                      className="placeholder:text-slate-500"
+                      style={errors.subject ? inputErrorStyle : inputStyle}
+                    >
+                      <SelectValue placeholder="Select a topic…" />
+                    </SelectTrigger>
+                    <SelectContent
+                      style={{
+                        background: "#0d1f3c",
+                        border: "1px solid rgba(0,99,196,0.4)",
+                        color: "white",
+                      }}
+                    >
+                      {SUBJECT_OPTIONS.map((opt) => (
+                        <SelectItem
+                          key={opt.value}
+                          value={opt.value}
+                          className="text-white focus:bg-blue-900/40 focus:text-white"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.subject && <p className="text-xs text-red-400">{errors.subject}</p>}
+                </div>
+
+                {/* Message */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="message" className="text-sm" style={{ color: "#cbd5e1" }}>
+                    Message <span className="text-red-400">*</span>
+                  </Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Tell us how we can help you…"
+                    rows={6}
+                    value={formData.message}
+                    onChange={(e) => updateField("message", e.target.value)}
+                    disabled={status === "loading"}
+                    className="resize-none placeholder:text-slate-500"
+                    style={errors.message ? inputErrorStyle : inputStyle}
+                  />
+                  <div className="flex justify-between">
+                    {errors.message
+                      ? <p className="text-xs text-red-400">{errors.message}</p>
+                      : <span />
+                    }
+                    <p className="text-xs" style={{ color: "#64748b" }}>
+                      {formData.message.length} / 1000
+                    </p>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={status === "loading"}
+                  className="w-full text-white border-0 font-semibold"
+                  style={{
+                    background: "linear-gradient(135deg, #0063c4, #004a93)",
+                    boxShadow: "0 8px 32px rgba(0,99,196,0.4)",
+                  }}
+                >
+                  {status === "loading" ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending…</>
+                  ) : (
+                    <><Send className="mr-2 h-4 w-4" />Send Message</>
+                  )}
+                </Button>
+
+                
+              </form>
             </div>
           </div>
         </div>
       </section>
+
+      
     </main>
   );
 }

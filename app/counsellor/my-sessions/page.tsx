@@ -14,7 +14,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Search, Calendar } from "lucide-react";
+import { Search, Calendar, CalendarDays } from "lucide-react";
 
 interface Session {
   id: string;
@@ -30,6 +30,19 @@ interface Session {
 }
 
 type FilterStatus = "all" | "upcoming" | "completed" | "cancelled";
+
+/* ─── Shared Styles ───────────────────────── */
+const glassCard: React.CSSProperties = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(0,99,196,0.25)",
+  backdropFilter: "blur(8px)",
+  borderRadius: "1rem",
+};
+
+const pageBackground: React.CSSProperties = {
+  background: "linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)",
+  minHeight: "100vh",
+};
 
 export default function CounsellorMySessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -113,6 +126,7 @@ export default function CounsellorMySessionsPage() {
   const upcomingSessions = sessions.filter(
     (s) => s.status === "upcoming",
   ).length;
+
   const completedSessions = sessions.filter(
     (s) => s.status === "completed",
   ).length;
@@ -146,148 +160,331 @@ export default function CounsellorMySessionsPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Loading sessions...</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={pageBackground}
+      >
+        <div className="flex items-center gap-3" style={{ color: "#64748b" }}>
+          <div
+            className="h-5 w-5 rounded-full border-2 border-t-transparent animate-spin"
+            style={{
+              borderColor: "rgba(0,99,196,0.4)",
+              borderTopColor: "#0063c4",
+            }}
+          />
+          <span className="text-sm">Loading sessions...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen p-6 space-y-6" style={pageBackground}>
+      {/* blobs */}
+      <div
+        className="pointer-events-none fixed -top-32 -left-32 h-96 w-96 rounded-full blur-3xl -z-10"
+        style={{ background: "rgba(0,99,196,0.2)" }}
+      />
+
+      <div
+        className="pointer-events-none fixed -bottom-32 -right-32 h-96 w-96 rounded-full blur-3xl -z-10"
+        style={{ background: "rgba(0,99,196,0.15)" }}
+      />
+
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">My Sessions</h1>
-        <p className="text-muted-foreground">
-          Manage and view your counselling sessions
-        </p>
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">My Sessions</h1>
+
+          <p className="text-sm mt-1" style={{ color: "#64748b" }}>
+            Manage and view your counselling sessions
+          </p>
+        </div>
+
+        <div
+          className="h-10 w-10 flex items-center justify-center rounded-xl"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(0,99,196,0.3), rgba(0,74,147,0.2))",
+            border: "1px solid rgba(0,99,196,0.4)",
+          }}
+        >
+          <CalendarDays className="h-5 w-5" style={{ color: "#60a5fa" }} />
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground mb-1">
-              Upcoming Sessions
-            </p>
-            <p className="text-2xl font-bold">{upcomingSessions}</p>
-          </CardContent>
-        </Card>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={glassCard} className="p-6">
+          <p className="text-sm mb-2" style={{ color: "#64748b" }}>
+            Upcoming Sessions
+          </p>
 
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground mb-1">
-              Completed Sessions
-            </p>
-            <p className="text-2xl font-bold">{completedSessions}</p>
-          </CardContent>
-        </Card>
+          <h2 className="text-3xl font-bold text-white">{upcomingSessions}</h2>
+        </div>
+
+        <div style={glassCard} className="p-6">
+          <p className="text-sm mb-2" style={{ color: "#64748b" }}>
+            Completed Sessions
+          </p>
+
+          <h2 className="text-3xl font-bold text-white">{completedSessions}</h2>
+        </div>
       </div>
 
-      {/* Sessions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Session List</CardTitle>
+      {/* Main Card */}
+      <div className="max-w-7xl mx-auto">
+        <div style={glassCard}>
+          {/* Header */}
+          <div className="p-6 border-b border-white/10">
+            <div className="flex flex-col lg:flex-row gap-4 justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-white">
+                  Session List
+                </h2>
 
-          <div className="mt-4 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by student name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+                <p className="text-sm mt-1" style={{ color: "#64748b" }}>
+                  Track all your counselling meetings
+                </p>
+              </div>
+
+              {/* Search */}
+              <div className="relative w-full lg:w-80">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  style={{ color: "#64748b" }}
+                />
+
+                <Input
+                  placeholder="Search by student name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 text-white border-0"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(0,99,196,0.3)",
+                  }}
+                />
+              </div>
+            </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="p-0">
+          {/* Tabs */}
           <Tabs
             value={filterStatus}
             onValueChange={(v) => setFilterStatus(v as FilterStatus)}
           >
-            <div className="border-b px-6 pt-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            <div className="px-6 pt-6">
+              <TabsList
+                className="grid w-full grid-cols-4 p-1"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(0,99,196,0.2)",
+                }}
+              >
+                <TabsTrigger
+                  className="
+    text-white
+    data-[state=active]:text-white
+    data-[state=active]:bg-[#0063c4]
+    data-[state=active]:shadow-none
+    rounded-lg
+    transition-all
+  "
+                  value="all"
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger className="
+    text-white
+    data-[state=active]:text-white
+    data-[state=active]:bg-[#0063c4]
+    data-[state=active]:shadow-none
+    rounded-lg
+    transition-all
+  " value="upcoming">Upcoming</TabsTrigger>
+                <TabsTrigger className="
+    text-white
+    data-[state=active]:text-white
+    data-[state=active]:bg-[#0063c4]
+    data-[state=active]:shadow-none
+    rounded-lg
+    transition-all
+  " value="completed">Completed</TabsTrigger>
+                <TabsTrigger className="
+    text-white
+    data-[state=active]:text-white
+    data-[state=active]:bg-[#0063c4]
+    data-[state=active]:shadow-none
+    rounded-lg
+    transition-all
+  " value="cancelled">Cancelled</TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value={filterStatus} className="mt-0">
               {sortedSessions.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Time</TableHead>
-                        <TableHead>Session</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                <div className="overflow-x-auto p-6">
+                  <div
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      border: "1px solid rgba(0,99,196,0.2)",
+                      background: "rgba(255,255,255,0.02)",
+                    }}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow
+                          style={{
+                            borderBottom: "1px solid rgba(0,99,196,0.15)",
+                          }}
+                        >
+                          <TableHead className="text-white">Student</TableHead>
 
-                    <TableBody>
-                      {sortedSessions.map((session) => (
-                        <TableRow key={session.id}>
-                          <TableCell>{session.studentName}</TableCell>
-                          <TableCell>{session.date.toDateString()}</TableCell>
-                          <TableCell>{session.time}</TableCell>
-                          <TableCell>{session.sessionType}</TableCell>
-                          <TableCell>{session.status}</TableCell>
+                          <TableHead className="text-white">Date</TableHead>
 
-                          <TableCell className="text-right space-x-2">
-                            {session.joinLink &&
-                              session.status === "upcoming" && (
+                          <TableHead className="text-white">Time</TableHead>
+
+                          <TableHead className="text-white">Session</TableHead>
+
+                          <TableHead className="text-white">Status</TableHead>
+
+                          <TableHead className="text-right text-slate-400">
+                            Actions
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+
+                      <TableBody>
+                        {sortedSessions.map((session) => (
+                          <TableRow
+                            key={session.id}
+                            className="border-white/5 hover:bg-white/[0.03]"
+                          >
+                            <TableCell className="text-white font-medium">
+                              <div>
+                                <p>{session.studentName}</p>
+
+                                <p
+                                  className="text-xs mt-1"
+                                  style={{ color: "#64748b" }}
+                                >
+                                  {session.studentEmail}
+                                </p>
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="text-white">
+                              {session.date.toDateString()}
+                            </TableCell>
+
+                            <TableCell className="text-white">
+                              {session.time}
+                            </TableCell>
+
+                            <TableCell className="text-white">
+                              {session.sessionType}
+                            </TableCell>
+
+                            <TableCell>
+                              <span
+                                className="px-3 py-1 rounded-full text-xs font-medium capitalize"
+                                style={
+                                  session.status === "upcoming"
+                                    ? {
+                                        background: "rgba(59,130,246,0.15)",
+                                        border:
+                                          "1px solid rgba(59,130,246,0.3)",
+                                        color: "#60a5fa",
+                                      }
+                                    : session.status === "completed"
+                                      ? {
+                                          background: "rgba(16,185,129,0.15)",
+                                          border:
+                                            "1px solid rgba(16,185,129,0.3)",
+                                          color: "#34d399",
+                                        }
+                                      : {
+                                          background: "rgba(239,68,68,0.15)",
+                                          border:
+                                            "1px solid rgba(239,68,68,0.3)",
+                                          color: "#f87171",
+                                        }
+                                }
+                              >
+                                {session.status}
+                              </span>
+                            </TableCell>
+
+                            <TableCell className="text-right space-x-2">
+                              {session.joinLink &&
+                                session.status === "upcoming" && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      window.open(session.joinLink, "_blank")
+                                    }
+                                    className="text-white border-0"
+                                    style={{
+                                      background:
+                                        "linear-gradient(135deg, #0063c4, #004a93)",
+                                      boxShadow:
+                                        "0 4px 20px rgba(0,99,196,0.4)",
+                                    }}
+                                  >
+                                    Join
+                                  </Button>
+                                )}
+
+                              {session.status === "upcoming" && (
                                 <Button
                                   size="sm"
+                                  variant="secondary"
                                   onClick={() =>
-                                    window.open(session.joinLink, "_blank")
+                                    updateSessionStatus(session.id, "completed")
                                   }
+                                  className="bg-white/10 text-white hover:bg-white/20"
                                 >
-                                  Join
+                                  Complete
                                 </Button>
                               )}
 
-                            {session.status === "upcoming" && (
                               <Button
                                 size="sm"
-                                variant="secondary"
-                                onClick={() =>
-                                  updateSessionStatus(session.id, "completed")
-                                }
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedSession(session);
+                                  setModalOpen(true);
+                                }}
+                                className="border-white/10 bg-transparent text-white hover:bg-white/10"
                               >
-                                Mark Completed
+                                View
                               </Button>
-                            )}
-
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedSession(session);
-                                setModalOpen(true);
-                              }}
-                            >
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-muted-foreground">No sessions found</p>
+                <div className="text-center py-20">
+                  <Calendar
+                    className="h-14 w-14 mx-auto mb-4"
+                    style={{ color: "#64748b" }}
+                  />
+
+                  <p className="text-white font-medium">No sessions found</p>
+
+                  <p className="text-sm mt-1" style={{ color: "#64748b" }}>
+                    Try adjusting your filters or search
+                  </p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Modal */}
       {selectedSession && (

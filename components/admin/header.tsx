@@ -41,11 +41,11 @@ export function AdminHeader() {
       {/* Search */}
       <div className="hidden md:flex items-center flex-1 max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search students, counsellors, bookings..."
             className="pl-10 bg-muted/50 border-0 focus-visible:ring-1"
-          />
+          /> */}
         </div>
       </div>
 
@@ -56,7 +56,7 @@ export function AdminHeader() {
         </Button>
 
         {/* Notifications */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
@@ -77,7 +77,7 @@ export function AdminHeader() {
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         {/* Profile */}
         <DropdownMenu>
@@ -89,7 +89,7 @@ export function AdminHeader() {
               <span className="hidden sm:inline text-sm font-medium">Admin</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          {/* <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>Dashboards</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -117,7 +117,7 @@ export function AdminHeader() {
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>
-          </DropdownMenuContent>
+          </DropdownMenuContent> */}
         </DropdownMenu>
       </div>
     </header>

@@ -14,15 +14,7 @@ export function Footer() {
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-sm font-bold text-primary-foreground">
-              PF
-            </span>
-          </div>
-
-          <span className="text-lg font-semibold text-foreground">
-            PathFinder
-          </span>
+         <img src="./logo.png" alt="" className="w-[200px]" />
         </Link>
 
         {/* Links */}
