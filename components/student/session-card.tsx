@@ -28,6 +28,7 @@ interface Session {
 
 interface SessionCardProps {
   session: Session;
+  onCancel?: (id: string) => void;
 }
 
 const getStatusBadgeColor = (status: string) => {
@@ -56,7 +57,7 @@ const getStatusLabel = (status: string) => {
   }
 };
 
-export function SessionCard({ session }: SessionCardProps) {
+export function SessionCard({ session, onCancel }: SessionCardProps) {
   console.log("session", session);
   const [showDetail, setShowDetail] = useState(false);
   const formattedDate = session.date.toLocaleDateString("en-US", {
@@ -127,6 +128,7 @@ export function SessionCard({ session }: SessionCardProps) {
                       : "Session Completed"}
                   </Button>
                 )}
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -138,6 +140,24 @@ export function SessionCard({ session }: SessionCardProps) {
                     ? "View Details"
                     : "View Session"}
                 </Button>
+
+                {session.status === "scheduled" && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to cancel this meeting?",
+                      );
+
+                      if (confirmed) {
+                        onCancel?.(session.id);
+                      }
+                    }}
+                  >
+                    Cancel Meeting
+                  </Button>
+                )}
               </div>
             </div>
           </div>

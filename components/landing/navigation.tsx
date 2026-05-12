@@ -20,10 +20,8 @@ export function Navigation() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary">
-              <span className="text-primary-foreground font-bold text-sm">PF</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">PathFinder</span>
+            
+           <img className="logo" src="./logo.png" alt="logo" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -45,6 +43,12 @@ export function Navigation() {
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               How it Works
+            </Link>
+            <Link 
+              href="/contact-us" 
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
+            >
+              Contact Us
             </Link>
             {/* <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 outline-none">

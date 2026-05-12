@@ -232,3 +232,9 @@
     background-clip: text;
   }
 }
+
+
+.logo{
+  width: 240px !important;
+  margin-top: 20px;
+}

@@ -50,14 +50,14 @@ export function CTA() {
                     <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
-                <Button
+                {/* <Button
                   size="lg"
                   variant="outline"
                   className="rounded-xl px-8 h-14 text-base font-semibold border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 transition-all"
                   asChild
                 >
                   <Link href="/counsellors">Browse Counsellors</Link>
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>

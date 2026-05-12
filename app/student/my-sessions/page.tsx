@@ -69,7 +69,7 @@ export default function MySessionsPage() {
 
         const data = await res.json();
 
-        console.log("dataaaaaaa", data)
+        console.log("dataaaaaaa", data);
 
         const formatted: Session[] = data.map((meeting: any) => ({
           id: meeting._id,
@@ -96,6 +96,39 @@ export default function MySessionsPage() {
 
     fetchMeetings();
   }, [studentId]);
+
+  const handleCancelMeeting = async (meetingId: string) => {
+    try {
+      const res = await fetch("/api/meetings/updateMeeting", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: meetingId,
+          status: "cancelled",
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to cancel meeting");
+      }
+
+      // Update state instantly
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === meetingId
+            ? { ...session, status: "cancelled" }
+            : session,
+        ),
+      );
+
+      alert("Meeting cancelled successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Error cancelling meeting");
+    }
+  };
 
   const upcomingSessions = sessions.filter((s) => s.status === "scheduled");
   const completedSessions = sessions.filter((s) => s.status === "completed");
@@ -182,7 +215,11 @@ export default function MySessionsPage() {
                 sessions
                   .sort(sortByDateDesc)
                   .map((session) => (
-                    <SessionCard key={session.id} session={session} />
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      onCancel={handleCancelMeeting}
+                    />
                   ))
               ) : (
                 <p className="text-center text-muted-foreground">
