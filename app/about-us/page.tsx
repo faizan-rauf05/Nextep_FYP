@@ -1,5 +1,7 @@
 "use client";
 
+import { Footer } from "@/components/landing/footer";
+import { Navigation } from "@/components/landing/navigation";
 import {
   Target,
   Brain,
@@ -25,7 +27,9 @@ const glassCard: React.CSSProperties = {
 
 export default function AboutPage() {
   return (
-    <div
+    <>
+    <Navigation />
+      <div
       style={{
         minHeight: "100vh",
         background:
@@ -535,5 +539,7 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
+    <Footer />
+    </>
   );
 }

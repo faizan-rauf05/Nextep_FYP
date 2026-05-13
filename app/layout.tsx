@@ -8,7 +8,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'PathFinder | Career Counseling Platform',
+  title: 'NexStep | Career Counseling Platform',
   description: 'Connect with expert career counselors and find your ideal career path. Book personalized sessions with top professionals.',
   generator: 'v0.app',
   icons: {

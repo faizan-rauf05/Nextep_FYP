@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Contact from "@/models/Contact";
 
+// CREATE CONTACT
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
@@ -10,7 +11,6 @@ export async function POST(req: NextRequest) {
 
     const { name, email, subject, message } = body;
 
-    // Basic validation
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         {
@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Save in MongoDB
     const newContact = await Contact.create({
       name,
       email,
@@ -38,12 +37,39 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("CONTACT_API_ERROR:", error);
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
         error: "Something went wrong",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// GET ALL CONTACTS
+export async function GET() {
+  try {
+    await connectDB();
+
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: contacts,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch contacts",
       },
       { status: 500 }
     );

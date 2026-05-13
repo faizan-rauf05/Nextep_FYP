@@ -21,6 +21,7 @@ const navItems = [
   { label: "Students", href: "/admin/students", icon: Users },
   { label: "Career Counsellors", href: "/admin/counsellors", icon: UserCog },
   { label: "Bookings & Sessions", href: "/admin/bookings", icon: Calendar },
+  { label: "Inquiries", href: "/admin/inquiries", icon: Calendar },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ]
 

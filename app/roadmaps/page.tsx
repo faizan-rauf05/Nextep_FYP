@@ -2,13 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import jsPDF from "jspdf";
+
+// ─────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────
+
+interface ProjectItem {
+  title: string;
+  description: string;
+  deadline: string;
+}
 
 interface RoadmapPhase {
   title: string;
   duration: string;
   description: string;
   skills: string[];
-  projects: string[];
+  projects: ProjectItem[];
+}
+
+interface ResourceItem {
+  title: string;
+  url?: string;
 }
 
 interface RoadmapData {
@@ -19,7 +35,7 @@ interface RoadmapData {
   certifications: string[];
   tools: string[];
   universities: string[];
-  youtubeResources: string[];
+  youtubeResources: ResourceItem[];
   finalAdvice: string;
 }
 
@@ -53,6 +69,8 @@ export default function RoadmapPage() {
 
         const result = await res.json();
 
+        console.log("ROADMAP API RESPONSE:", result);
+
         if (result.error) {
           throw new Error(result.error);
         }
@@ -68,14 +86,163 @@ export default function RoadmapPage() {
     generateRoadmap();
   }, [career, education, goal]);
 
+
+  const downloadPDF = () => {
+  if (!data) return;
+
+  const doc = new jsPDF();
+
+  let y = 20;
+
+  const addLine = (text: string, spacing = 8) => {
+    const splitText = doc.splitTextToSize(text, 180);
+
+    doc.text(splitText, 15, y);
+
+    y += splitText.length * 7 + spacing;
+
+    // auto new page
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  // Title
+  doc.setFontSize(22);
+  doc.text(`${data.career} Roadmap`, 15, y);
+
+  y += 15;
+
+  doc.setFontSize(12);
+
+  addLine(`Overview: ${data.overview}`);
+
+  addLine(`Estimated Duration: ${data.estimatedDuration}`);
+
+  addLine(`Goal: ${goal}`);
+
+  // Phases
+  data.roadmap.forEach((phase, idx) => {
+    doc.setFontSize(16);
+
+    addLine(`${idx + 1}. ${phase.title}`);
+
+    doc.setFontSize(12);
+
+    addLine(`Duration: ${phase.duration}`);
+
+    addLine(`Description: ${phase.description}`);
+
+    addLine(`Skills:`);
+
+    phase.skills.forEach((skill) => {
+      addLine(`• ${skill}`, 2);
+    });
+
+    addLine(`Projects:`);
+
+    phase.projects.forEach((project: any) => {
+      if (typeof project === "string") {
+        addLine(`• ${project}`, 2);
+      } else {
+        addLine(`• ${project.title}`, 2);
+
+        if (project.description) {
+          addLine(`  ${project.description}`, 2);
+        }
+
+        if (project.deadline) {
+          addLine(`  Deadline: ${project.deadline}`, 2);
+        }
+      }
+    });
+
+    y += 5;
+  });
+
+  // Tools
+  doc.setFontSize(16);
+
+  addLine("Recommended Tools");
+
+  doc.setFontSize(12);
+
+  data.tools.forEach((tool) => {
+    addLine(`• ${tool}`, 2);
+  });
+
+  // Certifications
+  doc.setFontSize(16);
+
+  addLine("Certifications");
+
+  doc.setFontSize(12);
+
+  data.certifications.forEach((cert) => {
+    addLine(`• ${cert}`, 2);
+  });
+
+  // Universities
+  doc.setFontSize(16);
+
+  addLine("Universities");
+
+  doc.setFontSize(12);
+
+  data.universities.forEach((uni) => {
+    addLine(`• ${uni}`, 2);
+  });
+
+  // Resources
+  doc.setFontSize(16);
+
+  addLine("Learning Resources");
+
+  doc.setFontSize(12);
+
+  data.youtubeResources.forEach((resource: any) => {
+    if (typeof resource === "string") {
+      addLine(`• ${resource}`, 2);
+    } else {
+      addLine(`• ${resource.title}`, 2);
+
+      if (resource.url) {
+        addLine(`  ${resource.url}`, 2);
+      }
+    }
+  });
+
+  // Final Advice
+  doc.setFontSize(16);
+
+  addLine("Final Advice");
+
+  doc.setFontSize(12);
+
+  addLine(data.finalAdvice);
+
+  // Save PDF
+  doc.save(`${data.career}-roadmap.pdf`);
+};
+
+  // ─────────────────────────────────────────────────────────────
+  // Loading
+  // ─────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
       <div style={styles.center}>
         <div style={styles.loader}></div>
+
         <h2>Generating your roadmap...</h2>
       </div>
     );
   }
+
+  // ─────────────────────────────────────────────────────────────
+  // Error
+  // ─────────────────────────────────────────────────────────────
 
   if (error) {
     return (
@@ -87,7 +254,29 @@ export default function RoadmapPage() {
 
   if (!data) return null;
 
+  // ─────────────────────────────────────────────────────────────
+  // Page
+  // ─────────────────────────────────────────────────────────────
+
   return (
+    <>
+    <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
+  <button
+    onClick={downloadPDF}
+    style={{
+      padding: "14px 20px",
+      borderRadius: 12,
+      border: "none",
+      background: "#2563EB",
+      color: "#FFF",
+      fontWeight: 700,
+      cursor: "pointer",
+      fontSize: 15,
+    }}
+  >
+    Download PDF
+  </button>
+</div>
     <div style={styles.page}>
       <div style={styles.container}>
         {/* Header */}
@@ -124,6 +313,7 @@ export default function RoadmapPage() {
 
                 <p style={styles.phaseDesc}>{phase.description}</p>
 
+                {/* Skills */}
                 <div style={styles.subSection}>
                   <h4>Skills to Learn</h4>
 
@@ -136,14 +326,31 @@ export default function RoadmapPage() {
                   </div>
                 </div>
 
+                {/* Projects */}
                 <div style={styles.subSection}>
                   <h4>Projects</h4>
 
-                  <div style={styles.chips}>
-                    {phase.projects.map((project, i) => (
-                      <span key={i} style={styles.projectChip}>
-                        {project}
-                      </span>
+                  <div style={styles.projectGrid}>
+                    {phase.projects.map((project: any, i) => (
+                      <div key={i} style={styles.projectCard}>
+                        {typeof project === "string" ? (
+                          <>
+                            <h4 style={styles.projectTitle}>{project}</h4>
+                          </>
+                        ) : (
+                          <>
+                            <h4 style={styles.projectTitle}>{project.title}</h4>
+
+                            <p style={styles.projectDesc}>
+                              {project.description}
+                            </p>
+
+                            <span style={styles.projectDeadline}>
+                              ⏰ {project.deadline}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -171,7 +378,7 @@ export default function RoadmapPage() {
 
           <div style={styles.chips}>
             {data.certifications.map((cert, i) => (
-              <span key={i} style={styles.projectChip}>
+              <span key={i} style={styles.certChip}>
                 {cert}
               </span>
             ))}
@@ -191,20 +398,37 @@ export default function RoadmapPage() {
           </div>
         </div>
 
-        {/* Youtube */}
+        {/* Resources */}
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Free Learning Resources</h2>
 
           <div style={styles.resources}>
-            {data.youtubeResources.map((resource, i) => (
+            {data.youtubeResources.map((resource: any, i) => (
               <div key={i} style={styles.resourceCard}>
-                ▶ {resource}
+                {typeof resource === "string" ? (
+                  <div style={styles.resourceTitle}>▶ {resource}</div>
+                ) : (
+                  <>
+                    <div style={styles.resourceTitle}>▶ {resource.title}</div>
+
+                    {resource.url && (
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={styles.resourceLink}
+                      >
+                        Open Resource →
+                      </a>
+                    )}
+                  </>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Advice */}
+        {/* Final Advice */}
         <div style={styles.adviceBox}>
           <h3>💡 Final Advice</h3>
 
@@ -212,8 +436,13 @@ export default function RoadmapPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// Styles
+// ─────────────────────────────────────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
@@ -358,7 +587,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   subSection: {
-    marginTop: 18,
+    marginTop: 24,
   },
 
   chips: {
@@ -375,7 +604,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
   },
 
-  projectChip: {
+  certChip: {
     background: "#EEF2FF",
     color: "#4338CA",
     padding: "8px 14px",
@@ -391,6 +620,41 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
   },
 
+  projectGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 14,
+    marginTop: 14,
+  },
+
+  projectCard: {
+    border: "1px solid #E5E7EB",
+    borderRadius: 16,
+    padding: 18,
+    background: "#F9FAFB",
+  },
+
+  projectTitle: {
+    margin: 0,
+    marginBottom: 8,
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#111827",
+  },
+
+  projectDesc: {
+    margin: 0,
+    color: "#6B7280",
+    lineHeight: 1.7,
+    marginBottom: 12,
+  },
+
+  projectDeadline: {
+    fontSize: 13,
+    fontWeight: 600,
+    color: "#4338CA",
+  },
+
   resources: {
     display: "flex",
     flexDirection: "column",
@@ -398,10 +662,22 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   resourceCard: {
-    padding: 16,
-    borderRadius: 14,
+    padding: 18,
+    borderRadius: 16,
     background: "#F9FAFB",
     border: "1px solid #E5E7EB",
+  },
+
+  resourceTitle: {
+    fontWeight: 600,
+    marginBottom: 10,
+  },
+
+  resourceLink: {
+    color: "#2563EB",
+    textDecoration: "none",
+    fontWeight: 600,
+    fontSize: 14,
   },
 
   adviceBox: {
